@@ -153,10 +153,12 @@ separate explicit go-ahead (big/expensive). Same discipline per task.
       `target_vol / realized_vol` (capped) — lean in when calm, shrink when
       wild. Composable, long-only, no-lookahead. 6 tests incl. hand-computed
       scale-down.
-- [ ] **S3 — Re-evaluate risk-on.** `scripts/run_riskadjusted.py`: the
-      momentum+regime thread ± vol-targeting, risk-on with the fixed breaker,
-      across the token set, full-window + walk-forward vs buy-and-hold. Focus the
-      scorecard on risk-adjusted (Calmar, Sharpe, drawdown). Reports + summary.
+- [x] **S3 — Re-evaluate risk-on.** DONE. `scripts/run_riskadjusted.py`. Result:
+      vol-targeted regime momentum cuts drawdown in **5/5 folds on all 4 tokens**;
+      on BTC it beats buy-and-hold on Sharpe (0.67 vs 0.58) AND Calmar (0.51 vs
+      0.24) at <half the drawdown; vol-targeting improved both drawdown and
+      return vs plain. Hold still wins risk-adjusted on the steady bulls
+      (BNB/ETH). `reports/risk_adjusted_summary.md`.
 - [ ] **S4 — Update `FINDINGS.md`.** Does the risk-adjusted entry hold up on
       unseen folds — better drawdown/Calmar than buy-and-hold, consistently? Then
       STOP for operator review (and the search-engine decision).

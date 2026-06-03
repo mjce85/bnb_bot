@@ -15,6 +15,7 @@ reports/*.html
 reports/*_in_sample.md
 reports/*_out_of_sample.md
 reports/*_robust.md
+reports/*_riskadj.md
 logs/
 
 # Env / secrets — never commit
