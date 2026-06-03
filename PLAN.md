@@ -58,9 +58,12 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
       RiskManager Protocol: stop-loss (forces exit) > position-size cap >
       total-exposure cap > drawdown breaker (halt new entries, allow trims).
       Every rule only lowers risk. 9 tests, one per rule + engine integration.
-- [ ] **T6 — strategy.py.** Strategy ABC (`generate_signals(candles) -> Signal`)
-      + two baselines: (a) **momentum** (e.g. EMA/breakout), (b) **mean-
-      reversion** (e.g. z-score / RSI band). Param dataclasses, no magic numbers.
+- [x] **T6 — strategy.py.** DONE. `Strategy` ABC implements the engine's real
+      `signal(history)->float` contract (reconciled from the PLAN's
+      `generate_signals` sketch — the engine never consumed that). Baselines:
+      `Momentum` (EMA crossover, pure) + `MeanReversion` (z-score band w/
+      hysteresis). Frozen param dataclasses, validated, no magic numbers. 11
+      tests green.
 - [ ] **T7 — report.py + run_backtest.py CLI.** Produce a markdown report with
       the metric table + an equity/drawdown plot into `reports/`.
 - [ ] **T8 — baseline run.** Run both strategies over the token set on an
