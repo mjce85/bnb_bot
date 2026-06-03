@@ -54,9 +54,10 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
       Stdlib-only; annualization inferred from bar spacing; degenerate cases
       (flat equity, no drawdown, micro-window) handled loud, not papered over.
       8 hand-computed tests green.
-- [ ] **T5 — risk.py.** Position sizing (fraction of equity, capped), max-DD
-      breaker (halt new entries past threshold — port the imx_bot breaker
-      *concept*), per-trade stop-loss, max concurrent exposure. Tests per rule.
+- [x] **T5 — risk.py.** DONE. `RuleBasedRisk(limits)` satisfies the engine's
+      RiskManager Protocol: stop-loss (forces exit) > position-size cap >
+      total-exposure cap > drawdown breaker (halt new entries, allow trims).
+      Every rule only lowers risk. 9 tests, one per rule + engine integration.
 - [ ] **T6 — strategy.py.** Strategy ABC (`generate_signals(candles) -> Signal`)
       + two baselines: (a) **momentum** (e.g. EMA/breakout), (b) **mean-
       reversion** (e.g. z-score / RSI band). Param dataclasses, no magic numbers.
