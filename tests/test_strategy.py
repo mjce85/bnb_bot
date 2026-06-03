@@ -14,6 +14,7 @@ from bnb_bot.strategy import (
     Strategy,
     TrendFollowing,
     TrendFollowingParams,
+    VolatilityTargeted,
 )
 from bnb_bot.types import Candle
 
@@ -184,3 +185,52 @@ def test_regime_gated_runs_through_engine():
     assert isinstance(gated, SignalSource)
     res = run_backtest(candles, gated, symbol="X/USDT", strategy_name=gated.name)
     assert len(res.equity_curve) == len(candles)
+
+
+# --- volatility targeting ----------------------------------------------
+
+
+def test_vol_target_params_validation():
+    with pytest.raises(ValueError, match="target_vol"):
+        VolatilityTargeted(_AlwaysWeight(1.0), target_vol=0.0)
+    with pytest.raises(ValueError, match="lookback"):
+        VolatilityTargeted(_AlwaysWeight(1.0), lookback=1)
+    with pytest.raises(ValueError, match="max_weight"):
+        VolatilityTargeted(_AlwaysWeight(1.0), max_weight=1.5)
+
+
+def test_vol_target_flat_during_warmup():
+    vt = VolatilityTargeted(_AlwaysWeight(1.0), lookback=4)
+    assert vt.signal(_candles([100, 101, 102])) == 0.0  # < lookback+1 closes
+
+
+def test_vol_target_passes_flat_base_through():
+    vt = VolatilityTargeted(_AlwaysWeight(0.0), lookback=4)
+    assert vt.signal(_candles([100, 101, 99, 102, 98])) == 0.0
+
+
+def test_vol_target_full_weight_when_calm():
+    # Perfectly flat closes -> realized vol 0 -> scale capped at max_weight.
+    vt = VolatilityTargeted(
+        _AlwaysWeight(1.0), target_vol=0.02, lookback=4, max_weight=1.0
+    )
+    assert vt.signal(_candles([100.0] * 6)) == pytest.approx(1.0)
+
+
+def test_vol_target_scales_down_when_wild():
+    # Returns alternate +/-10% -> realized vol (pstdev) = 0.10.
+    # scale = target_vol/vol = 0.02/0.10 = 0.2; base weight 1.0 -> 0.2.
+    closes = [100.0, 110.0, 99.0, 108.9, 98.01]
+    vt = VolatilityTargeted(
+        _AlwaysWeight(1.0), target_vol=0.02, lookback=4, max_weight=1.0
+    )
+    assert vt.signal(_candles(closes)) == pytest.approx(0.2, rel=1e-6)
+
+
+def test_vol_target_composes_and_runs_through_engine():
+    closes = list(range(1, 160))
+    vt = VolatilityTargeted(RegimeGated(Momentum(), trend_period=100), lookback=20)
+    assert isinstance(vt, SignalSource)
+    assert "target_vol" in vt.params and "regime_trend_period" in vt.params
+    res = run_backtest(_candles(closes), vt, symbol="X/USDT", strategy_name=vt.name)
+    assert len(res.equity_curve) == len(closes)

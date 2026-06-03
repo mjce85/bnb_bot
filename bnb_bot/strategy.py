@@ -230,3 +230,73 @@ class RegimeGated(Strategy):
         if closes[-1] <= sma:
             return 0.0  # downtrend regime -> cash, base is overruled
         return self._base.signal(history)
+
+
+# --- Volatility targeting (composable) ---------------------------------
+
+
+class VolatilityTargeted(Strategy):
+    """Scale a base strategy's weight inversely to recent realized volatility.
+
+    The core of the risk-adjusted thesis: hold a roughly *constant amount of
+    risk* instead of a constant amount of capital. When recent volatility is
+    calm, deploy up to ``max_weight`` of the base signal; when it's wild, shrink
+    exposure so a turbulent regime can't inflict a large drawdown.
+
+    ``target_vol`` is a per-bar target (e.g. 0.02 = 2% daily). The scale factor
+    is ``target_vol / realized_vol``, capped at ``max_weight`` (long-only spot,
+    so no leverage above the cap). Realized vol is the population stdev of the
+    last ``lookback`` simple returns. Wraps any base; preserves no-lookahead
+    (vol is computed only from past closes).
+    """
+
+    def __init__(
+        self,
+        base: Strategy,
+        *,
+        target_vol: float = 0.02,
+        lookback: int = 20,
+        max_weight: float = 1.0,
+    ):
+        if target_vol <= 0:
+            raise ValueError("target_vol must be > 0")
+        if lookback < 2:
+            raise ValueError("lookback must be >= 2 to have a dispersion")
+        if not 0 < max_weight <= 1:
+            raise ValueError("max_weight must be in (0, 1] (long-only spot)")
+        self._base = base
+        self._target_vol = target_vol
+        self._lookback = lookback
+        self._max_weight = max_weight
+
+    @property
+    def name(self) -> str:
+        return f"{self._base.name}_voltgt"
+
+    @property
+    def params(self) -> dict:
+        return {
+            **self._base.params,
+            "target_vol": self._target_vol,
+            "vol_lookback": self._lookback,
+            "max_weight": self._max_weight,
+        }
+
+    def signal(self, history: list[Candle]) -> float:
+        base_w = self._base.signal(history)
+        if base_w <= 0.0:
+            return 0.0  # base is flat — nothing to size
+
+        closes = [c.close for c in history]
+        if len(closes) < self._lookback + 1:
+            return 0.0  # warmup — not enough returns to estimate vol
+
+        window = closes[-(self._lookback + 1) :]
+        rets = [window[i] / window[i - 1] - 1.0 for i in range(1, len(window))]
+        vol = statistics.pstdev(rets)
+        scale = (
+            self._max_weight
+            if vol <= 0
+            else min(self._max_weight, self._target_vol / vol)
+        )
+        return max(0.0, min(1.0, base_w * scale))

@@ -142,15 +142,17 @@ return). Make the risk layer trustworthy, then build risk-adjusted exposure and
 re-test honestly. The multi-agent **strategy-search engine is HELD** for a
 separate explicit go-ahead (big/expensive). Same discipline per task.
 
-- [ ] **S1 — Fix drawdown-breaker lockout.** The engine maintains a *campaign
-      peak* that resets when the book goes flat, so the breaker measures drawdown
-      since the last flat instead of an unreachable all-time peak. Risk `adjust`
-      contract unchanged; fix is in how the engine feeds `peak_equity`. Engine
-      re-entry test proving the strategy is no longer locked out.
-- [ ] **S2 — Volatility-targeted sizing.** Composable
-      `VolatilityTargeted(base, target_vol, lookback, max_weight)` wrapper that
-      scales a base strategy's weight inversely to recent realized volatility —
-      lean in when calm, shrink when wild. Long-only, capped. Tests.
+- [x] **S1 — Fix drawdown-breaker lockout.** DONE. Engine resets `peak_equity`
+      to current equity while flat (campaign peak), so the breaker measures
+      drawdown since the last flat — no permanent lockout (BNB risk-on exposure
+      2%→50.7%). Documented on the RiskManager contract; engine re-entry test.
+      Caveat surfaced: reset-when-flat misses cumulative whipsaw bleed (vol
+      targeting handles that).
+- [x] **S2 — Volatility-targeted sizing.** DONE. `VolatilityTargeted(base,
+      target_vol, lookback, max_weight)` scales the base weight by
+      `target_vol / realized_vol` (capped) — lean in when calm, shrink when
+      wild. Composable, long-only, no-lookahead. 6 tests incl. hand-computed
+      scale-down.
 - [ ] **S3 — Re-evaluate risk-on.** `scripts/run_riskadjusted.py`: the
       momentum+regime thread ± vol-targeting, risk-on with the fixed breaker,
       across the token set, full-window + walk-forward vs buy-and-hold. Focus the
