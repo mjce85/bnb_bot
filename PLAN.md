@@ -74,7 +74,11 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
       hourly. Per-run reports + `reports/baseline_summary.md`. Result: both
       baselines lose heavily in BOTH windows; the lone in-sample winner (CAKE
       momentum +75%) collapses to -55% OOS — textbook overfit. See FINDINGS.md.
-- [ ] **T9 — STOP. Write `FINDINGS.md`** (see gate below) and halt.
+- [x] **T9 — STOP. Write `FINDINGS.md`** (see gate below) and halt. DONE.
+      FINDINGS.md written: baselines have no edge (lose in both windows, even in
+      bull in-sample), one in-sample winner is overfit, drawdowns 45–99%,
+      Sharpe negative in 15/16 runs. Recommendation: don't tune — cut trade
+      frequency + apply the existing risk layer, or rethink the arena. HALTED.
 
 ## 🛑 STOP-AND-WAIT GATE (do not cross autonomously)
 
