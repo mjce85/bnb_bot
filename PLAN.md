@@ -189,8 +189,10 @@ per-token. The multi-agent search engine stays parked. Same discipline per task.
       a submission front-door: the pitch, the strategy in plain terms, the three
       backtest-honesty guards, headline + holdout results, one-command repro, repo
       map, and honest limitations.
-- [ ] **P4 — Final sweep + `FINDINGS.md` update.** Verify everything runs clean;
-      record the locked config and holdout result. STOP for operator review.
+- [x] **P4 — Final sweep + `FINDINGS.md` update.** DONE. `black` clean (27
+      files), 83 tests green, no stale refs. FINDINGS Stage 4 records the search
+      discipline, the locked entry, the holdout pass, and what's packaged. Entry
+      is submission-ready as backtest+report. STOPPED for operator review.
 
 ---
 

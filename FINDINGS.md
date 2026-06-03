@@ -385,3 +385,86 @@ which is the one thing our whole pitch is built against.
 built and validated. I'm holding on the strategy-search engine (token-expensive,
 needs your explicit go-ahead) and on packaging until you pick the path in
 section 4. Your call, Markus.
+
+---
+---
+
+# FINDINGS — Stage 4: bounded search + packaged entry (P1–P4, 2026-06-03)
+
+You picked the bounded search → package path. Done. **The entry is locked,
+holdout-validated, and packaged for submission.**
+
+## 1. The search was disciplined on purpose.
+
+120 parameter configs (volatility target × trend window × vol lookback ×
+rebalance band). Two guards against fooling ourselves:
+
+- **Untouched holdout.** Each token's most recent 25% was held out. The search
+  ranked configs on the first 75% only.
+- **One config across all four tokens** — not the best per coin (that's
+  curve-fitting). Picked the single set that's best *on average*, among those
+  that beat buy-and-hold drawdown on every token.
+
+The winner sits on a **stable plateau** (the top-8 configs cluster together), not
+a lone lucky spike — exactly what you want to see.
+
+## 2. The locked entry.
+
+`VOL_TARGETED_REGIME_MOMENTUM` (frozen in `bnb_bot/presets.py`): volatility
+target 0.015/day, 50-day trend filter, 30-day volatility lookback, 3% rebalance
+band, risk-on (10% stop-loss, 20% drawdown breaker).
+
+Full-window result (drawdown is the headline):
+
+| Token | Strategy ret / maxDD | Buy & hold ret / maxDD |
+| --- | --- | --- |
+| BNB | +191% / **22%** | +1781% / 71% |
+| BTC | +71% / **37%** | +151% / 77% |
+| ETH | +35% / **36%** | +175% / 79% |
+| CAKE | **+20%** / 36% | −92% / 98% |
+
+Drawdown roughly a third to a half of buy-and-hold, positive on every token —
+including CAKE, which holding would have nearly wiped out.
+
+## 3. The honesty test it passed.
+
+On the **untouched holdout** (data the search never saw), the entry beat
+buy-and-hold's **drawdown on 4/4 tokens** and its **return on 3/4**. On BNB:
+**+48% vs +2%, Sharpe 1.33 vs 0.29, Calmar 1.89 vs 0.02.** That's the result
+that matters most — it wasn't fit to that data, and it held up. (The one return
+miss was CAKE, which chopped sideways in the holdout; we still cut its drawdown
+by two-thirds.)
+
+## 4. What's packaged.
+
+- **`bnb_bot/presets.py`** — the frozen entry, pinned by tests so it can't drift.
+- **`scripts/run_entry.py`** — one command reproduces the headline
+  (`reports/entry_summary.md`).
+- **`scripts/search_params.py`** — re-runs the validated search.
+- **`README.md`** — judge-facing: the pitch, the three honesty guards, the
+  results, repro steps, and honest limits.
+- **83 tests green; `black` clean.**
+
+## 5. Where things stand — and what's left for you.
+
+The Track-2 entry is **submission-ready as a backtest+report**: a disciplined,
+honestly-validated risk-control strategy with a coherent story (we don't chase
+the top, we don't eat the crash) backed by out-of-sample evidence.
+
+Still genuinely yours to decide (all held, none started):
+
+1. **The multi-agent strategy-search engine** — only worth it if you want to push
+   the result further; it's the token-expensive option and needs an explicit go.
+2. **The live execution layer** (Trust Wallet / BNB Chain) — out of scope this
+   milestone by design, gated on your review.
+3. **Submission polish** — a demo video / slide, or wiring the CMC live-quote
+   path, if the hackathon format wants more than a repo.
+
+My recommendation: **review the README and `reports/entry_summary.md`, and if
+you're happy, this is a legitimate entry to submit.** Anything beyond that is
+upside, not necessity.
+
+---
+
+🛑 **Stopping for review (P4).** Stage 4 complete — searched, locked, packaged,
+all green. Nothing further runs without your go-ahead. Over to you, Markus.
