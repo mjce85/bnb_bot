@@ -64,8 +64,11 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
       `Momentum` (EMA crossover, pure) + `MeanReversion` (z-score band w/
       hysteresis). Frozen param dataclasses, validated, no magic numbers. 11
       tests green.
-- [ ] **T7 — report.py + run_backtest.py CLI.** Produce a markdown report with
-      the metric table + an equity/drawdown plot into `reports/`.
+- [x] **T7 — report.py + run_backtest.py CLI.** DONE. `render_report` writes a
+      markdown metric table + honesty notes + a two-panel equity/drawdown PNG
+      (matplotlib Agg) into `reports/`. CLI `scripts/run_backtest.py` wires
+      data→strategy→risk→backtest→metrics→report with fail-loud date parsing.
+      5 tests (tmp_path, no committed artifacts) green.
 - [ ] **T8 — baseline run.** Run both strategies over the token set on an
       **in-sample window**, holding out the most recent ~30% as out-of-sample.
       Save reports. Report BOTH windows honestly — flag any in/out gap as
