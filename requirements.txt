@@ -1,0 +1,16 @@
+# Core data + math (mirrors imx_bot stack — no new heavy deps)
+ccxt>=4.5            # historical OHLCV across exchanges (Binance for BSC-listed tokens)
+polars>=1.40         # lazy DataFrames + parquet
+pyarrow>=15          # parquet engine
+numpy>=1.26
+pandas>=2.0          # ccxt convenience / some metric helpers
+
+# Live signals (optional; CMC free tier — latest quotes only)
+aiohttp>=3.9
+
+# Reporting
+matplotlib>=3.8      # equity-curve / drawdown plots
+
+# Dev
+pytest>=8.0
+black>=24.0
