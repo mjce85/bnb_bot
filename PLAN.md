@@ -135,6 +135,32 @@ position cap opened to 100% (stop-loss + drawdown breaker still active).
 
 ---
 
+## Stage 3 — Risk-adjusted entry (operator-approved 2026-06-03)
+
+Operator chose: **the risk-adjusted story is our entry** (lower drawdown over raw
+return). Make the risk layer trustworthy, then build risk-adjusted exposure and
+re-test honestly. The multi-agent **strategy-search engine is HELD** for a
+separate explicit go-ahead (big/expensive). Same discipline per task.
+
+- [ ] **S1 — Fix drawdown-breaker lockout.** The engine maintains a *campaign
+      peak* that resets when the book goes flat, so the breaker measures drawdown
+      since the last flat instead of an unreachable all-time peak. Risk `adjust`
+      contract unchanged; fix is in how the engine feeds `peak_equity`. Engine
+      re-entry test proving the strategy is no longer locked out.
+- [ ] **S2 — Volatility-targeted sizing.** Composable
+      `VolatilityTargeted(base, target_vol, lookback, max_weight)` wrapper that
+      scales a base strategy's weight inversely to recent realized volatility —
+      lean in when calm, shrink when wild. Long-only, capped. Tests.
+- [ ] **S3 — Re-evaluate risk-on.** `scripts/run_riskadjusted.py`: the
+      momentum+regime thread ± vol-targeting, risk-on with the fixed breaker,
+      across the token set, full-window + walk-forward vs buy-and-hold. Focus the
+      scorecard on risk-adjusted (Calmar, Sharpe, drawdown). Reports + summary.
+- [ ] **S4 — Update `FINDINGS.md`.** Does the risk-adjusted entry hold up on
+      unseen folds — better drawdown/Calmar than buy-and-hold, consistently? Then
+      STOP for operator review (and the search-engine decision).
+
+---
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).

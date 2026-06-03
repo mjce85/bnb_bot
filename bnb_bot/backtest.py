@@ -54,6 +54,12 @@ class RiskManager(Protocol):
     return the risk-adjusted target weight (e.g. 0.0 to force flat on a stop,
     or a capped weight for position sizing). Default behaviour (no manager) is
     identity — the raw strategy weight is used as-is.
+
+    ``peak_equity`` is the **campaign peak**: the high-water mark since the book
+    was last flat, not an all-time high. The engine resets it to current equity
+    whenever the position is flat, so a drawdown breaker measures the drop within
+    the current position campaign and cannot lock a cash-sitting strategy out
+    permanently.
     """
 
     def adjust(
@@ -155,7 +161,13 @@ def run_backtest(
         if pending_target is not None:
             open_price = bar.open
             equity_at_exec = cash + pos.base_qty * open_price
-            if equity_at_exec > peak_equity:
+            # Campaign peak: while the book is flat, reset the peak to current
+            # equity. The drawdown breaker then measures the drop *since the
+            # position was last flat*, not from an all-time high that a strategy
+            # sitting in cash can never reclaim (which would lock it out forever).
+            if pos.base_qty <= 0:
+                peak_equity = equity_at_exec
+            elif equity_at_exec > peak_equity:
                 peak_equity = equity_at_exec
 
             target_w = pending_target
@@ -195,7 +207,9 @@ def run_backtest(
 
         # 3. Mark equity to this bar's close and record the curve point.
         equity = cash + pos.base_qty * bar.close
-        if equity > peak_equity:
+        if pos.base_qty <= 0:  # flat after rebalance -> campaign peak resets
+            peak_equity = equity
+        elif equity > peak_equity:
             peak_equity = equity
         equity_curve.append((bar.ts, equity))
 

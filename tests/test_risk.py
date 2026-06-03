@@ -157,3 +157,44 @@ def test_integration_position_cap_limits_deployment():
     assert buy.side is Side.BUY
     # ~0.25 of 10_000 / 100 = ~25 units (minus a hair of slippage on sizing).
     assert buy.base_qty == pytest.approx(25.0, rel=1e-3)
+
+
+class _PhaseStrat:
+    """Long, then flat through a crash, then long again on recovery."""
+
+    def signal(self, history):
+        i = len(history) - 1  # current decision bar
+        if i <= 2:
+            return 1.0  # phase A: long
+        if i <= 5:
+            return 0.0  # phase B: flat (exit during/after the crash)
+        return 1.0  # phase C: long again
+
+
+def test_drawdown_breaker_does_not_lock_out_after_going_flat():
+    # Enter at 100, crash to 70 (>20% drawdown) while the strategy exits to cash,
+    # then recover. With the campaign-peak fix the breaker must let the strategy
+    # back in on the recovery; the old all-time-peak behaviour locked it out.
+    prices = [100, 100, 100, 100, 70, 70, 75, 80, 80, 80]
+    candles = [
+        Candle(ts=i * HOUR, open=p, high=p, low=p, close=p, volume=1.0)
+        for i, p in enumerate(prices)
+    ]
+    # Full allocation allowed; stop-loss effectively off so the EXIT is driven by
+    # the strategy signal, isolating the breaker's re-entry behaviour.
+    risk = RuleBasedRisk(
+        config.RiskLimits(
+            max_position_frac=1.0,
+            max_total_exposure=1.0,
+            max_drawdown_halt=0.20,
+            stop_loss_frac=0.99,
+        )
+    )
+    res = run_backtest(
+        candles, _PhaseStrat(), symbol="X/USDT", starting_equity=10_000.0, risk=risk
+    )
+
+    buys = [f for f in res.fills if f.side is Side.BUY]
+    reentry = [f for f in buys if f.ts >= 7 * HOUR]
+    assert reentry, "breaker locked the strategy out of re-entry after a drawdown"
+    assert len(buys) >= 2  # initial entry + at least one re-entry

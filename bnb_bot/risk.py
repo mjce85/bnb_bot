@@ -17,10 +17,13 @@ Four rules, applied in this precedence (each can only make the book *safer*):
 3. **Total-exposure cap** — nor exceed ``max_total_exposure`` deployed at once.
    (Single-symbol today, so this and the position cap both reduce to ``min``;
    the lower of the two binds. Kept distinct for when we go multi-symbol.)
-4. **Drawdown breaker** — once equity is ``max_drawdown_halt`` below its peak,
-   halt *new* exposure: the target is capped at the weight already held, so the
-   strategy can still trim or exit but cannot add. Ported concept (not code)
-   from imx_bot's breaker.
+4. **Drawdown breaker** — once equity is ``max_drawdown_halt`` below its
+   *campaign* peak (the high since the book was last flat — see
+   ``backtest.RiskManager``), halt *new* exposure: the target is capped at the
+   weight already held, so the strategy can still trim or exit but cannot add.
+   Because the peak resets when flat, a strategy that goes to cash is never
+   locked out — it can re-enter once a fresh signal appears. Ported concept (not
+   code) from imx_bot's breaker.
 
 Every rule only ever lowers risk, so order matters only for clarity: a stop
 exits even mid-breaker, and the breaker never forces buying.
