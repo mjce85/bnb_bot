@@ -69,10 +69,11 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
       (matplotlib Agg) into `reports/`. CLI `scripts/run_backtest.py` wires
       data→strategy→risk→backtest→metrics→report with fail-loud date parsing.
       5 tests (tmp_path, no committed artifacts) green.
-- [ ] **T8 — baseline run.** Run both strategies over the token set on an
-      **in-sample window**, holding out the most recent ~30% as out-of-sample.
-      Save reports. Report BOTH windows honestly — flag any in/out gap as
-      likely overfit.
+- [x] **T8 — baseline run.** DONE. `scripts/run_baseline.py` swept 4 tokens ×
+      2 strategies × {in-sample 70% / out-of-sample 30%} over 2024-06→2026-06
+      hourly. Per-run reports + `reports/baseline_summary.md`. Result: both
+      baselines lose heavily in BOTH windows; the lone in-sample winner (CAKE
+      momentum +75%) collapses to -55% OOS — textbook overfit. See FINDINGS.md.
 - [ ] **T9 — STOP. Write `FINDINGS.md`** (see gate below) and halt.
 
 ## 🛑 STOP-AND-WAIT GATE (do not cross autonomously)
