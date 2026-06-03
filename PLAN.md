@@ -40,12 +40,11 @@ Each task: implement → `black` → `pytest` (green) → atomic git commit. Tas
 ordered so each builds on a tested foundation. All work is code + backtests in
 this sandbox repo — nothing irreversible, no money, safe to run unattended.
 
-- [ ] **T1 — config.py + types.py.** Constants (PancakeSwap swap fee ~0.25%,
-      slippage bps, gas est, risk limits, token set, default window) and the
-      core dataclasses. Trivial tests that they import + round-trip.
-- [ ] **T2 — data.py.** ccxt (Binance) OHLCV fetch for the token set, cache to
-      `data/<symbol>_<tf>.parquet`. Detect + **fail loud** on gaps/missing
-      candles (no silent fill). Test against a synthetic gap fixture.
+- [x] **T1 — config.py + types.py.** DONE (commit 45fa0a3). CostModel +
+      RiskLimits (range-validated) + core dataclasses; 8 tests green.
+- [x] **T2 — data.py.** DONE (commit da1ff52). ccxt Binance fetch + parquet
+      cache + `assert_contiguous` fail-loud gap detection; 8 tests green; live
+      fetch smoke-tested. **Overnight loop: start here, at T3.**
 - [ ] **T3 — backtest.py engine.** Walk candles; signal at *t* sees only ≤ *t*;
       fill at *t+1* open; apply fees+slippage+gas; track positions + equity
       curve. **Tests assert no-lookahead and exact fee math** on a hand-computed
