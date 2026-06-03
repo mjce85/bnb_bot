@@ -10,6 +10,10 @@ from bnb_bot.strategy import (
     MeanReversionParams,
     Momentum,
     MomentumParams,
+    RegimeGated,
+    Strategy,
+    TrendFollowing,
+    TrendFollowingParams,
 )
 from bnb_bot.types import Candle
 
@@ -107,3 +111,76 @@ def test_both_strategies_are_signal_sources_and_run():
         assert res.strategy == strat.name
         # Engine ran end to end and produced one equity point per bar.
         assert len(res.equity_curve) == len(candles)
+
+
+# --- trend following ---------------------------------------------------
+
+
+def test_trend_following_params_reject_short_period():
+    with pytest.raises(ValueError, match="trend_period"):
+        TrendFollowingParams(trend_period=1)
+
+
+def test_trend_following_flat_during_warmup():
+    strat = TrendFollowing(TrendFollowingParams(trend_period=100))
+    assert strat.signal(_candles(list(range(1, 50)))) == 0.0
+
+
+def test_trend_following_long_above_sma_flat_below():
+    strat = TrendFollowing(TrendFollowingParams(trend_period=100))
+    assert strat.signal(_candles(list(range(1, 120)))) == 1.0  # rising -> above SMA
+    assert strat.signal(_candles(list(range(120, 1, -1)))) == 0.0  # falling -> below
+
+
+# --- regime gate -------------------------------------------------------
+
+
+class _AlwaysWeight(Strategy):
+    """Test stub: always wants the same fixed weight, regardless of history."""
+
+    def __init__(self, w: float):
+        self._w = w
+
+    @property
+    def name(self) -> str:
+        return "always"
+
+    @property
+    def params(self) -> dict:
+        return {"w": self._w}
+
+    def signal(self, history):
+        return self._w
+
+
+def test_regime_gate_forces_flat_in_downtrend():
+    gated = RegimeGated(_AlwaysWeight(1.0), trend_period=100)
+    # Falling series: last close below its SMA -> gate overrules base to cash.
+    assert gated.signal(_candles(list(range(120, 1, -1)))) == 0.0
+
+
+def test_regime_gate_passes_base_through_in_uptrend():
+    gated = RegimeGated(_AlwaysWeight(0.7), trend_period=100)
+    # Rising series: uptrend regime -> base's exact weight passes through.
+    assert gated.signal(_candles(list(range(1, 120)))) == pytest.approx(0.7)
+
+
+def test_regime_gate_flat_during_warmup():
+    gated = RegimeGated(_AlwaysWeight(1.0), trend_period=100)
+    assert gated.signal(_candles(list(range(1, 50)))) == 0.0
+
+
+def test_regime_gate_name_and_params_compose():
+    gated = RegimeGated(Momentum(MomentumParams(fast_period=5, slow_period=20)), 100)
+    assert gated.name == "momentum_ema_cross_regime100"
+    assert gated.params["regime_trend_period"] == 100
+    assert gated.params["fast_period"] == 5  # base params preserved
+
+
+def test_regime_gated_runs_through_engine():
+    closes = list(range(1, 160))
+    candles = _candles(closes)
+    gated = RegimeGated(MeanReversion(), trend_period=100)
+    assert isinstance(gated, SignalSource)
+    res = run_backtest(candles, gated, symbol="X/USDT", strategy_name=gated.name)
+    assert len(res.equity_curve) == len(candles)

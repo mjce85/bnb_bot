@@ -151,3 +151,82 @@ class MeanReversion(Strategy):
             self._long = False
         # between thresholds: hold the current stance (hysteresis)
         return 1.0 if self._long else 0.0
+
+
+# --- Trend following ---------------------------------------------------
+
+
+@dataclass(frozen=True)
+class TrendFollowingParams:
+    trend_period: int = 100  # SMA lookback (bars; designed for daily)
+
+    def __post_init__(self):
+        if self.trend_period < 2:
+            raise ValueError("trend_period must be >= 2")
+
+
+class TrendFollowing(Strategy):
+    """Long while price is above its long SMA, flat otherwise.
+
+    The robust low-turnover baseline: it sits in **cash** whenever the trend is
+    down, so it never fights a sustained downturn. Turnover is low because the
+    price crosses a long SMA far less often than two fast EMAs cross each other.
+    """
+
+    def __init__(self, params: TrendFollowingParams = TrendFollowingParams()):
+        self._params = params
+
+    @property
+    def name(self) -> str:
+        return "trend_following_sma"
+
+    @property
+    def params(self) -> dict:
+        return asdict(self._params)
+
+    def signal(self, history: list[Candle]) -> float:
+        closes = [c.close for c in history]
+        if len(closes) < self._params.trend_period:
+            return 0.0  # warmup
+        sma = statistics.mean(closes[-self._params.trend_period :])
+        return 1.0 if closes[-1] > sma else 0.0
+
+
+# --- Regime gate (composable) ------------------------------------------
+
+
+class RegimeGated(Strategy):
+    """Force a base strategy flat unless the long-term trend is up.
+
+    Wraps any :class:`Strategy`. When the latest close is at or below its
+    ``trend_period`` SMA (a downtrend regime) the gate returns ``0.0`` — cash —
+    no matter what the base wants. In an uptrend the base strategy's own signal
+    passes through unchanged. The base always receives the full causal history,
+    so no-lookahead is preserved.
+
+    This is the fix for both probe killers at once: momentum stops whipsawing
+    long in downtrends, and mean-reversion stops catching falling knives.
+    """
+
+    def __init__(self, base: Strategy, trend_period: int = 100):
+        if trend_period < 2:
+            raise ValueError("trend_period must be >= 2")
+        self._base = base
+        self._trend_period = trend_period
+
+    @property
+    def name(self) -> str:
+        return f"{self._base.name}_regime{self._trend_period}"
+
+    @property
+    def params(self) -> dict:
+        return {**self._base.params, "regime_trend_period": self._trend_period}
+
+    def signal(self, history: list[Candle]) -> float:
+        closes = [c.close for c in history]
+        if len(closes) < self._trend_period:
+            return 0.0  # warmup — no trend reference yet
+        sma = statistics.mean(closes[-self._trend_period :])
+        if closes[-1] <= sma:
+            return 0.0  # downtrend regime -> cash, base is overruled
+        return self._base.signal(history)

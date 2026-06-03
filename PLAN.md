@@ -98,6 +98,35 @@ creep in — and it needs the operator's judgment on *direction*.
 Keep it blunt. A clear "the baselines don't beat fees, here's why" is a
 *successful* overnight outcome — it saves Markus a week.
 
+**Gate outcome (operator decision):** baselines confirmed no edge. Markus chose
+the **robust redesign** thread (Stage 2 below) over a parameter search or an
+arena change.
+
+---
+
+## Stage 2 — Robust redesign (operator-approved 2026-06-03)
+
+Attack the three killers the probe found: fees, long-only-in-downtrends, and
+overfit. Same discipline: implement → `black` → `pytest` (green) → atomic commit
+→ mark `[x]`. Daily bars, ~5y history (2021→2026), risk-on with the single-asset
+position cap opened to 100% (stop-loss + drawdown breaker still active).
+
+- [ ] **R1 — regime filter + low-turnover strategies.** Add `TrendFollowing`
+      (long above a long SMA, else cash — native downtrend avoidance) and a
+      composable `RegimeGated(base, trend_period)` wrapper that forces any base
+      strategy flat unless the long trend is up. Tests per behaviour.
+- [ ] **R2 — walk-forward + benchmark harness.** `bnb_bot/walkforward.py`:
+      `buy_and_hold(candles)` benchmark result + `walk_forward(...)` that scores
+      a (fresh) strategy across N consecutive unseen folds vs buy-and-hold.
+      Tests vs hand-checked folds.
+- [ ] **R3 — robust baseline run.** `scripts/run_robust.py`: daily, ~5y, risk-on
+      (single-asset limits), strategies = TrendFollowing + RegimeGated momentum
+      + RegimeGated mean-reversion, across the token set. Per-run reports +
+      `reports/robust_summary.md` with strategy-vs-hold and per-fold consistency.
+- [ ] **R4 — update `FINDINGS.md`.** Append a Stage 2 section: did daily +
+      regime + risk beat buy-and-hold and control drawdown on unseen folds, or
+      not? Blunt as before. Then STOP for operator review.
+
 ---
 
 ## Out of scope this milestone
