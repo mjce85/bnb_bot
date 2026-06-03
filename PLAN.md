@@ -185,8 +185,10 @@ per-token. The multi-agent search engine stays parked. Same discipline per task.
       + risk limits). `scripts/run_entry.py` reproduces the headline in one
       command → `reports/entry_summary.md` (full-window drawdowns 22–37% vs hold
       71–98%, positive return on all 4 tokens). 5 tests pin the preset.
-- [ ] **P3 — Judge-facing `README.md`.** What it is, the backtest-honesty
-      guarantees, how to reproduce, the headline risk-adjusted results, the pitch.
+- [x] **P3 — Judge-facing `README.md`.** DONE. Replaced the scaffold README with
+      a submission front-door: the pitch, the strategy in plain terms, the three
+      backtest-honesty guards, headline + holdout results, one-command repro, repo
+      map, and honest limitations.
 - [ ] **P4 — Final sweep + `FINDINGS.md` update.** Verify everything runs clean;
       record the locked config and holdout result. STOP for operator review.
 

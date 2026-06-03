@@ -1,31 +1,149 @@
-# bnb_bot
+# bnb_bot — a disciplined, honestly-backtested trading strategy
 
-Track 2 entry for **BNB HACK — AI Trading Agent** (CoinMarketCap × Trust
-Wallet × BNB Chain, June 2026): a strategy engine that produces
-**backtestable** trading strategies for BNB-chain / liquid tokens, judged on
-returns, drawdown, and risk-adjusted performance.
+**BNB HACK — AI Trading Agent · Track 2 (backtestable strategy engine)**
 
-Sibling to `imx_bot` (NFT trading) and `sol_bot`. Reuses their *discipline* —
-backtest honesty + circuit-breaker risk control — not their code.
+> Our edge is not the biggest number. It's a strategy whose backtest you can
+> *trust*, that controls drawdown by design, and that proves itself on data it
+> was never tuned on.
 
-## Status
+`bnb_bot` is a strategy engine that generates and backtests trading strategies
+on liquid BNB-ecosystem tokens. The shippable entry is **volatility-targeted,
+regime-gated momentum**: it rides uptrends, sits in cash during downtrends, and
+scales its exposure down when markets get turbulent — cutting drawdown to a
+fraction of buy-and-hold while staying profitable.
 
-Scaffold sprint. See [`PLAN.md`](PLAN.md) for the task list and
-[`CLAUDE.md`](CLAUDE.md) for the hard rules (no live trading this milestone,
-fail-loud, guard the three backtest lies).
+This milestone is **backtest + report only**. No live trading, no orders, no
+keys, no capital at risk.
 
-## Setup
+---
+
+## Why this entry
+
+The judged axes are **returns, max drawdown, risk-adjusted performance, and rule
+adherence**. We built to the last three deliberately. A long-only spot strategy
+cannot out-return a crypto bull market — and any strategy that *claims* to is
+usually lying to itself through one of the three classic backtest mistakes. So we
+made two things our product:
+
+1. **A backtester that cannot lie** (see *Backtest honesty* below).
+2. **Disciplined risk control** — a strategy that reliably halves drawdown and
+   preserves capital in crashes, validated on a strict out-of-sample holdout.
+
+## The strategy, in plain terms
+
+Three layers, each fixing a real failure we measured in naive baselines:
+
+- **Momentum** — go long when the short-term trend is up (EMA crossover).
+- **Regime gate** — *only* hold when price is above its long (50-day) moving
+  average. In a sustained downtrend the strategy is flat (in cash), so it never
+  fights the tide or "catches falling knives."
+- **Volatility targeting** — size the position for a constant *risk* budget, not
+  constant capital: lean in when markets are calm, shrink when they're wild.
+
+On top sits a **risk layer**: a per-trade stop-loss and a drawdown breaker that
+halts new entries during a deep drawdown.
+
+The exact, frozen parameters live in
+[`bnb_bot/presets.py`](bnb_bot/presets.py) (`VOL_TARGETED_REGIME_MOMENTUM`) and
+were chosen by a holdout-validated search, not by hand.
+
+## Backtest honesty — the three lies we guard against
+
+This is the core of the product. Each guard is enforced in code and pinned by
+tests:
+
+1. **No look-ahead.** A signal at bar *t* sees only data with timestamp ≤ *t*,
+   and every fill happens at the *next* bar's open — never the same bar's close.
+   Tested by feeding two series that differ only in the future and asserting
+   identical past fills.
+2. **All costs modelled.** Every simulated fill pays a swap fee + slippage + gas.
+   There is no fee-free path through the engine.
+3. **No overfitting.** Results are reported on a **walk-forward** basis and on an
+   **untouched 25% holdout** the parameter search never saw. Strategy parameters
+   are chosen once, across all tokens — never cherry-picked per coin.
+
+If a metric can't be computed honestly, the code raises rather than inventing a
+number.
+
+## Headline results
+
+Daily bars, 2021 … 2026, four tokens (BNB, CAKE, ETH, BTC). Every fill pays
+costs; signals are causal.
+
+**Full window — strategy vs buy & hold (max drawdown is the story):**
+
+| Token | Strategy return | B&H return | Strategy maxDD | B&H maxDD |
+| --- | ---: | ---: | ---: | ---: |
+| BNB | +191% | +1781% | **22%** | 71% |
+| BTC | +71% | +151% | **37%** | 77% |
+| ETH | +35% | +175% | **36%** | 79% |
+| CAKE | **+20%** | −92% | **36%** | 98% |
+
+Drawdown is roughly **one-third to one-half** of buy-and-hold across the board,
+and the strategy stays *positive even in CAKE, which lost 92% over the period.*
+
+**Untouched holdout (most recent 25%, scored once) — the honesty test:**
+
+The strategy beat buy-and-hold's **drawdown on 4/4 tokens** and its **return on
+3/4** on data the search never touched. On BNB it returned **+48% vs +2%** at a
+**Sharpe of 1.33 vs 0.29**. Full detail in
+[`reports/search_summary.md`](reports/search_summary.md).
+
+## Reproduce it
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-pytest                       # correctness gate — must be green
-python scripts/run_backtest.py --help
+python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
+
+# Reproduce the headline entry result (fetches free Binance history via ccxt):
+./venv/bin/python scripts/run_entry.py        # -> reports/entry_summary.md
+
+# Re-run the holdout-validated parameter search:
+./venv/bin/python scripts/search_params.py    # -> reports/search_summary.md
+
+# Run any single strategy/token/window and get a report + equity/drawdown plot:
+./venv/bin/python scripts/run_backtest.py --symbol BNB/USDT \
+    --start 2022-01-01 --end 2025-01-01 --strategy momentum --risk
+
+# Tests (the backtest's credibility lives here):
+./venv/bin/python -m pytest -q
 ```
 
-## Data
-
 Historical OHLCV comes from `ccxt` (Binance spot, free, no key) cached as
-parquet under `data/` (gitignored). No CoinMarketCap paid tier required;
-the CMC free-tier key is used only for *live* latest quotes, later.
+parquet under `data/` (gitignored).
+
+## Repository layout
+
+```
+bnb_bot/
+  config.py       cost model + risk limits (range-validated)
+  types.py        core dataclasses (Candle, Signal, Fill, Position, ...)
+  data.py         ccxt OHLCV loader + parquet cache + fail-loud gap detection
+  backtest.py     event-driven engine: no-lookahead, costs on every fill
+  strategy.py     Momentum, MeanReversion, TrendFollowing + RegimeGated /
+                  VolatilityTargeted composable wrappers
+  risk.py         stop-loss, position/exposure caps, drawdown breaker
+  metrics.py      return, drawdown, Sharpe, Sortino, Calmar, win rate, exposure
+  walkforward.py  buy-and-hold benchmark + walk-forward evaluation
+  report.py       markdown report + equity/drawdown plot
+  presets.py      the frozen, validated submission entry
+scripts/          run_backtest · run_entry · search_params · (analysis runs)
+tests/            83 tests pinning the engine, metrics, risk, and strategies
+```
+
+## Honest limitations
+
+- **Costs are modelled, not measured on-venue.** We charge PancakeSwap-style
+  fees on Binance price data; real on-chain slippage would differ (and is size-
+  dependent). The drawdown conclusions are robust to plausible cost changes; the
+  exact percentages should not be quoted as precise.
+- **Long-only spot.** In a strong, steady bull market, buy-and-hold out-returns
+  us — we trade upside for much lower drawdown. That trade-off is the point.
+- **One historical path.** 2021–2026 is a single sequence of regimes. The
+  holdout and cross-token validation make the result credible, not guaranteed.
+
+## Status & scope
+
+Backtest + report only. The Trust Wallet / BNB Chain execution layer is a later,
+operator-gated concern; until then this repo moves no money and performs no
+irreversible action. See [`FINDINGS.md`](FINDINGS.md) for the full research
+narrative — including the dead-ends — and [`PLAN.md`](PLAN.md) for the build log.
