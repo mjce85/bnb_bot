@@ -49,8 +49,11 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
       target-weight engine: signal at *t* from causal slice, fill at *t+1* open,
       fees+slippage+gas on every fill; equity curve + fills. 9 tests assert
       no-lookahead (future-invariance + fill timing) and exact fee math.
-- [ ] **T4 — metrics.py.** Equity curve -> total return, max drawdown, Sharpe,
-      Sortino, Calmar, win rate, exposure %. Tests vs hand-computed values.
+- [x] **T4 — metrics.py.** DONE. `compute_metrics(result)` -> total return,
+      CAGR, max drawdown, Sharpe, Sortino, Calmar, win rate, exposure %.
+      Stdlib-only; annualization inferred from bar spacing; degenerate cases
+      (flat equity, no drawdown, micro-window) handled loud, not papered over.
+      8 hand-computed tests green.
 - [ ] **T5 — risk.py.** Position sizing (fraction of equity, capped), max-DD
       breaker (halt new entries past threshold — port the imx_bot breaker
       *concept*), per-trade stop-loss, max concurrent exposure. Tests per rule.
