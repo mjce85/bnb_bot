@@ -126,9 +126,12 @@ position cap opened to 100% (stop-loss + drawdown breaker still active).
       bug is surfaced in `reports/robust_summary.md`, not hidden. Result: cuts
       drawdown ~half, protects in dying assets, but underperforms hold in bull
       markets — insurance, not alpha.
-- [ ] **R4 — update `FINDINGS.md`.** Append a Stage 2 section: did daily +
-      regime + risk beat buy-and-hold and control drawdown on unseen folds, or
-      not? Blunt as before. Then STOP for operator review.
+- [x] **R4 — update `FINDINGS.md`.** DONE. Stage 2 section appended: redesign is
+      a risk-reducer not an alpha source — cuts drawdown ~half, protects in
+      crashes, but loses to buy-and-hold in bull markets (2/5 folds typical).
+      Standout: BTC momentum+regime (+130% vs hold +151% at half the drawdown).
+      Flags 3 operator decisions (risk-adjusted positioning, fix the breaker,
+      go to search engine?) + the breaker bug. STOPPED for review.
 
 ---
 

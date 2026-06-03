@@ -132,3 +132,134 @@ is the one thread I'd pull; everything else is rearranging deck chairs.
 🛑 **Stopping at the gate (T9).** Per PLAN.md I am not sharpening alpha,
 sweeping parameters, or adding strategies. The direction call — pull the
 lower-frequency thread, change arenas, or shelve it — is yours, Markus.
+
+---
+---
+
+# FINDINGS — Stage 2: robust redesign (R1–R4, 2026-06-03)
+
+You picked the **robust redesign** thread. Here's what it changed.
+
+**Bottom line: the redesign worked as far as it could — it stopped the bleeding
+and turned the strategies into a genuine *risk reducer*. But it did not produce
+*alpha*. None of the three strategies reliably beats simply holding the token.
+What they reliably do is cut drawdown (often roughly in half) and protect you in
+assets that collapse. That's insurance, not an edge. And along the way I found a
+real bug in our own risk module that has to be fixed before the risk layer is
+usable.**
+
+What changed from the probe: **daily** bars instead of hourly (≈24× fewer
+trades — the fee bleed is gone), a **trend/regime filter** so strategies sit in
+**cash** during downtrends instead of fighting them, a longer **2021→2026**
+history spanning a full bull/bear/recovery cycle, **walk-forward** scoring across
+5 unseen windows, and **buy-and-hold as the benchmark** on every run.
+
+Full numbers: `reports/robust_summary.md`. Headline numbers below are **risk-off**
+(see the bug section for why).
+
+## 1. Does anything beat buy-and-hold now? Mostly no — but the drawdowns got much better.
+
+Best strategy per token (risk-off, full 2021–2026 window):
+
+| Token | Buy & hold | Best strategy | Strat return | Drawdown: strat vs hold | Folds beaten |
+| --- | ---: | --- | ---: | --- | ---: |
+| BNB | **+1781%** | momentum+regime | +133% | 61% vs 71% | 3/5 |
+| BTC | +151% | momentum+regime | **+130%** | **37% vs 77%** | 2/5 |
+| ETH | +175% | meanrev+regime | +17% | 45% vs 79% | 2/5 |
+| CAKE | −92% | meanrev+regime | **−25%** | 45% vs 98% | 5/5 |
+
+Read it honestly:
+
+- **In bull markets, holding wins by a mile.** BNB rose +1781%; our best did
+  +133%. The strategies sit out the biggest up-legs (they're in cash on every
+  pullback), so they capture a fraction of a strong rise. No way around it for a
+  trend/regime approach.
+- **But drawdowns dropped a lot.** Almost every strategy cut max drawdown
+  versus holding — frequently to about half. **BTC momentum+regime is the
+  standout: +130% return (vs hold's +151%) at 37% drawdown (vs hold's 77%)** —
+  nearly the same money for half the pain. That's a real risk-adjusted
+  improvement on one asset.
+- **In a dying asset, the regime filter clearly earns its keep.** CAKE fell
+  −92%; sitting in cash during its decline cut the loss to −25% to −70%, and beat
+  hold in **5 of 5** walk-forward windows. Capital preservation works.
+
+## 2. Walk-forward tells the real story: this is a hedge, not an edge.
+
+Most strategies beat buy-and-hold in only **2 of 5** windows — and it's always
+the *same* 2: the down-market folds. They lose the up-market folds. In plain
+terms, these strategies are essentially a **bet against the asset / a volatility
+hedge**: they win when things fall and lag when things rise. That's a coherent,
+useful behaviour — but it is not a stable source of outperformance, and a judge
+looking at raw returns in a crypto bull market would not be impressed.
+
+## 3. Risk-adjusted picture: improved, and that's the whole point of the redesign.
+
+Drawdowns are dramatically better than the probe (no more 90%+ wipeouts from
+churn) and usually better than buy-and-hold. Sharpe ratios are still mostly
+around zero — these aren't efficient compounders — but the *shape* is what our
+stated differentiator cares about: smaller holes, faster recovery, capital
+protected in crashes. If our pitch is "disciplined risk control, not raw
+return," **BTC momentum+regime is the kind of result that pitch is made of.**
+
+## 4. I found a bug in our risk module — flagging, not fixing.
+
+I planned to run this risk-on (stop-loss + drawdown breaker active). When I did,
+every strategy collapsed to **~2% time in market and ~3 trades over five years**.
+That's not the strategy — it's a flaw in our **drawdown breaker**:
+
+> The breaker halts new entries while equity is ≥20% below its peak. But once a
+> strategy is forced into cash during a drawdown, its cash balance is frozen and
+> can never climb back to the old peak — so the breaker stays tripped *forever*.
+> One early rough patch disables the strategy permanently.
+
+Trend strategies are hit hardest because they're in cash exactly during the
+downturns that cause drawdowns. The fix is a small **risk-semantics decision**:
+the breaker's "peak" should reset (e.g. when the book goes flat, or after a
+recovery/cooldown). I did **not** patch it autonomously because how aggressive
+the breaker should be is a judgment call about how the product behaves — your
+call. The headline numbers above are risk-off, so they're unaffected; the
+`RiskOn Exp` columns in the summary show the collapse as evidence.
+
+## 5. Recommendation + the decisions I need from you.
+
+The robust redesign answered its question: **there is no easy long-only alpha
+here, but there is a defensible risk-control story** — especially BTC
+momentum+regime (near-hold return, half the drawdown) and capital preservation
+in crashes. Whether that's a *winning hackathon entry* depends on how the judges
+weigh "lower return, much lower risk" against raw return, and that's a
+positioning call, not an engineering one.
+
+Three decisions before I do more:
+
+1. **Is the risk-adjusted story our entry?** If yes, the next build is
+   volatility-aware sizing + leaning into the momentum+regime thread, and the
+   pitch becomes "we don't chase the top, we don't eat the crash." If raw return
+   is what we think wins, this whole approach is the wrong tool.
+2. **Fix the drawdown breaker?** Quick to do once you tell me the semantics you
+   want (reset-when-flat is my default suggestion). Needed before any risk-on
+   result is trustworthy.
+3. **Go to the strategy-search engine now?** We now have the walk-forward +
+   benchmark spine that makes a search safe from overfitting. This is the
+   bigger, multi-agent effort — worth it only if direction (1) says keep going.
+
+## 6. Caveats (same honesty bar as before).
+
+- **Costs are still assumptions on the wrong venue** (PancakeSwap-style fees on
+  Binance price data) — see Stage 1 caveats; unchanged.
+- **Walk-forward here is evaluation, not optimization.** Parameters are fixed
+  (SMA-100, default momentum/mean-reversion); each fold is scored independently.
+  We have *not* yet re-fit per fold — that's the search engine's job, and it's
+  where overfitting risk reappears and must be guarded.
+- **One config per strategy.** The BTC momentum+regime result is one asset, one
+  parameter set. It's promising, not proven — treat it as a thread to pull, not
+  a finding to bank.
+- **Survivorship/regime luck.** 2021–2026 is one historical path. CAKE's −92%
+  flatters the "protection" story; a different five years could look different.
+- **Still trustworthy where it counts:** no look-ahead, costs on every fill,
+  fresh strategy per fold so no state bleed. The numbers are honest.
+
+---
+
+🛑 **Stopping for review (R4).** Stage 2 is complete. I'm not fixing the breaker,
+tuning the risk-adjusted thread, or starting the search engine until you weigh in
+on the three decisions above — those are yours, Markus.
