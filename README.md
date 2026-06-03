@@ -70,6 +70,11 @@ number.
 Daily bars, 2021 … 2026, four tokens (BNB, CAKE, ETH, BTC). Every fill pays
 costs; signals are causal.
 
+![strategy vs buy & hold — equity and drawdown](docs/headline.png)
+
+*Blue = strategy, grey = buy & hold. The right column is the story: our drawdowns
+are a fraction of holding's, on every token.*
+
 **Full window — strategy vs buy & hold (max drawdown is the story):**
 
 | Token | Strategy return | B&H return | Strategy maxDD | B&H maxDD |

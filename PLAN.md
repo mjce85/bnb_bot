@@ -193,6 +193,10 @@ per-token. The multi-agent search engine stays parked. Same discipline per task.
       files), 83 tests green, no stale refs. FINDINGS Stage 4 records the search
       discipline, the locked entry, the holdout pass, and what's packaged. Entry
       is submission-ready as backtest+report. STOPPED for operator review.
+- [x] **P5 — Submission polish.** DONE. `scripts/make_figures.py` →
+      committed `docs/headline.png` (equity + underwater drawdown, strategy vs
+      hold, per token); devpost-style `SUBMISSION.md` pitch; figure wired into
+      README. Visual + narrative submission assets ready.
 
 ---
 
