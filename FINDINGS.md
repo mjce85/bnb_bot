@@ -534,3 +534,61 @@ tuning, so no new overfitting risk was introduced.
 reported honestly, including where my hypothesis was wrong. Still held for your
 explicit go-ahead: the multi-agent search engine, the live execution layer, and
 any demo polish. Over to you, Markus.
+
+---
+---
+
+# FINDINGS — Stage 6: robustness hardening (RB1–RB3, 2026-06-03)
+
+Stress-tested the frozen entry against our two weakest caveats — no tuning. One
+result is reassuringly strong; the other found a real weakness we needed to know.
+`reports/robustness_summary.md`.
+
+## 1. Out-of-universe: the entry generalizes (strong).
+
+Ran the *frozen* config on **8 liquid tokens it was never searched on** (XRP,
+ADA, DOGE, LINK, DOT, LTC, TRX, AVAX). It beat buy-and-hold's drawdown on
+**8/8** — drawdowns of 29–61% vs holding's 69–98%. Highlights: DOT −19% vs
+hold −86%; ADA +65% vs +34% at a third of the drawdown. The parameters were
+chosen on BNB/CAKE/ETH/BTC only, so holding the drawdown edge on completely
+unseen coins is the strongest evidence yet that the result isn't curve-fit.
+
+## 2. Cost sensitivity: the return edge is fragile (real weakness).
+
+| Costs | Strategy return | Strategy maxDD | Buy & hold return |
+| ---: | ---: | ---: | ---: |
+| 1× | +99% | 55% | +8% |
+| 2× | **+1%** | 64% | +8% |
+| 3× | **−47%** | 73% | +8% |
+
+The portfolio strategy trades ~500 times; buy-and-hold trades once. So doubling
+costs erases almost the entire return advantage and tripling turns it negative,
+while holding is unaffected. **Crucially, the drawdown control survives at every
+cost level** (still well below holding's 80% even at 3×) — it's the *return* edge
+that's cost-fragile, not the risk story.
+
+This matters because we charge PancakeSwap-style fees on Binance prices, and real
+on-chain BSC slippage (especially at size) could plausibly be 2–3× our
+assumption. Honest conclusion: **lead with the drawdown / capital-preservation
+result (robust to costs); treat the headline return as best-case-cost and always
+quote it with this caveat.**
+
+The fix, if we pursue it, is *lower turnover* — a wider rebalance band or a
+slower vol-targeting update. I did **not** apply it here: re-tuning a parameter to
+rescue the return number is exactly the overfitting reflex our pitch rejects.
+Flagged as a deliberate next step for your call, not a silent patch.
+
+## 3. Takeaway.
+
+Net, the entry came out of stress-testing *more* trustworthy, not less: it
+generalizes to unseen tokens, and its core claim (drawdown control) holds even at
+3× costs. The honest scar is that the eye-catching returns assume our cost model
+is right. Both are now documented in the README and SUBMISSION so no number is
+quoted without its caveat.
+
+---
+
+🛑 **Pausing here (Stage 6).** Robustness done and reported straight. The open,
+operator-gated calls remain: lower-turnover variant (cheap, would harden returns
+to cost), the multi-agent search engine, the live execution layer, GitHub + CI.
+Say the word on any.

@@ -221,6 +221,24 @@ a real portfolio (the per-symbol/total-exposure risk caps finally do something).
 
 ---
 
+## Stage 6 — Robustness hardening (operator-approved 2026-06-03)
+
+Harden the two weakest honesty caveats — zero parameter tuning, so no overfitting
+risk; this only strengthens or honestly weakens the existing claims.
+
+- [x] **RB1 — Cost-sensitivity sweep.** DONE. Found a real weakness: portfolio
+      return +99%→+1%→−47% at 1×/2×/3× costs (it trades ~500×), while hold is
+      unaffected. **Drawdown control survives all the way to 3×.** Lead with the
+      risk story; the return is cost-fragile.
+- [x] **RB2 — Out-of-universe generalization.** DONE. Frozen entry on 8 tokens
+      NOT in the search (XRP/ADA/DOGE/LINK/DOT/LTC/TRX/AVAX): drawdown beaten
+      **8/8**. Strong evidence it isn't curve-fit to the original four.
+- [x] **RB3 — `reports/robustness_summary.md` + FINDINGS update.** DONE. Both
+      results recorded blunt; README/SUBMISSION caveats updated so no number is
+      quoted without its cost caveat.
+
+---
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).

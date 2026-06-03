@@ -94,18 +94,26 @@ The strategy beat buy-and-hold's **drawdown on 4/4 tokens** and its **return on
 **Sharpe of 1.33 vs 0.29**. Full detail in
 [`reports/search_summary.md`](reports/search_summary.md).
 
+**Generalization (the strongest overfitting check):** run on **8 liquid tokens
+the parameters were never chosen on** (XRP, ADA, DOGE, LINK, DOT, LTC, TRX, AVAX),
+the frozen entry beat buy-and-hold's drawdown on **8/8**. See
+[`reports/robustness_summary.md`](reports/robustness_summary.md).
+
 **Traded as a portfolio (what you'd actually run):**
 
 ![portfolio vs equal-weight buy & hold](docs/portfolio.png)
 
 Run across all four tokens on one shared book, the strategy returns **+99% vs an
 equal-weight buy-and-hold portfolio's +8%**, at **55% vs 80% max drawdown**, and
-beats hold's drawdown in **5 of 5 walk-forward folds**. Honest note: the
-portfolio's drawdown (55%) is *higher* than the single-token average (33%) — these
-tokens are correlated and the portfolio deploys the cash single-token runs leave
-idle, trading some calm for a lot more return. The win here is capital efficiency
-versus holding, not diversification. Detail in
-[`reports/portfolio_summary.md`](reports/portfolio_summary.md).
+beats hold's drawdown in **5 of 5 walk-forward folds**. Two honest caveats: (a)
+the portfolio's drawdown (55%) is *higher* than the single-token average (33%) —
+these tokens are correlated and the portfolio deploys idle cash, so the win is
+capital efficiency vs holding, not diversification; (b) **that +99% return is
+cost-fragile** — at 2× our assumed costs it falls to ~+1%, at 3× it goes negative
+(the strategy trades a lot). The **drawdown control survives even at 3× costs**;
+the return edge does not. Detail in
+[`reports/portfolio_summary.md`](reports/portfolio_summary.md) and
+[`reports/robustness_summary.md`](reports/robustness_summary.md).
 
 ## Reproduce it
 
@@ -151,10 +159,13 @@ tests/            89 tests pinning the engine, metrics, risk, and strategies
 
 ## Honest limitations
 
-- **Costs are modelled, not measured on-venue.** We charge PancakeSwap-style
-  fees on Binance price data; real on-chain slippage would differ (and is size-
-  dependent). The drawdown conclusions are robust to plausible cost changes; the
-  exact percentages should not be quoted as precise.
+- **Costs are modelled, not measured on-venue — and returns are sensitive to
+  them.** We charge PancakeSwap-style fees on Binance price data; real on-chain
+  slippage would differ (and is size-dependent). We stress-tested this: the
+  **drawdown control is robust** (holds at 3× costs), but the **headline returns
+  are not** — at 2× assumed costs the portfolio's +99% falls to ~+1%. Quote the
+  return as best-case-cost; the risk-control story is the durable claim. Lower
+  turnover (a wider rebalance band) would harden returns to cost.
 - **Long-only spot.** In a strong, steady bull market, buy-and-hold out-returns
   us — we trade upside for much lower drawdown. That trade-off is the point.
 - **One historical path.** 2021–2026 is a single sequence of regimes. The

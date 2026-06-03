@@ -66,6 +66,8 @@ A small, fully-tested Python engine (no framework magic):
   walk-forward folds. (Honestly: the portfolio runs hotter than a single token —
   these coins are correlated — so the win is capital efficiency vs holding, not
   diversification.)
+- **It generalizes to coins it never saw** — run on 8 liquid tokens that were
+  *not* in the parameter search, it beat buy-and-hold's drawdown on **8/8**.
 - **A backtester we'd actually believe** — every honesty guard is enforced in
   code and tested (89 tests).
 
@@ -74,7 +76,10 @@ A small, fully-tested Python engine (no framework magic):
 There is no easy long-only alpha in liquid crypto — we proved it to ourselves
 with blunt negative results. But there *is* a durable edge in **discipline**:
 cutting drawdown in half, consistently and out-of-sample, is a real, defensible
-product, even when raw return trails a roaring bull market.
+product, even when raw return trails a roaring bull market. We also learned where
+*not* to trust ourselves: stress-testing showed our headline **returns are
+fragile to costs** (the strategy trades a lot), while the **drawdown control
+holds even at 3× costs** — so we lead with the risk story, not the return.
 
 ## What's next
 
