@@ -159,9 +159,11 @@ separate explicit go-ahead (big/expensive). Same discipline per task.
       0.24) at <half the drawdown; vol-targeting improved both drawdown and
       return vs plain. Hold still wins risk-adjusted on the steady bulls
       (BNB/ETH). `reports/risk_adjusted_summary.md`.
-- [ ] **S4 — Update `FINDINGS.md`.** Does the risk-adjusted entry hold up on
-      unseen folds — better drawdown/Calmar than buy-and-hold, consistently? Then
-      STOP for operator review (and the search-engine decision).
+- [x] **S4 — Update `FINDINGS.md`.** DONE. Stage 3 section: the risk-adjusted
+      entry holds up — drawdown beaten 5/5 folds on all tokens; BTC beats hold on
+      Sharpe+Calmar; CAKE turned −92% into +10%. Defensible entry. Flags the
+      live fork: short bounded search then package vs lock-and-package. STOPPED
+      for operator review.
 
 ---
 
