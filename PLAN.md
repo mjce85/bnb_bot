@@ -119,10 +119,13 @@ position cap opened to 100% (stop-loss + drawdown breaker still active).
       `buy_and_hold(candles)` benchmark result + `walk_forward(...)` that scores
       a (fresh) strategy across N consecutive unseen folds vs buy-and-hold.
       Tests vs hand-checked folds.
-- [ ] **R3 — robust baseline run.** `scripts/run_robust.py`: daily, ~5y, risk-on
-      (single-asset limits), strategies = TrendFollowing + RegimeGated momentum
-      + RegimeGated mean-reversion, across the token set. Per-run reports +
-      `reports/robust_summary.md` with strategy-vs-hold and per-fold consistency.
+- [x] **R3 — robust baseline run.** DONE. `scripts/run_robust.py`: daily, 2021→
+      2026, 3 regime-aware strategies × 4 tokens, full-window + 5-fold walk-forward
+      vs buy-and-hold. Headline read switched to **risk-off** after discovering a
+      drawdown-breaker **lockout bug** (risk-on collapses exposure to ~2%); the
+      bug is surfaced in `reports/robust_summary.md`, not hidden. Result: cuts
+      drawdown ~half, protects in dying assets, but underperforms hold in bull
+      markets — insurance, not alpha.
 - [ ] **R4 — update `FINDINGS.md`.** Append a Stage 2 section: did daily +
       regime + risk beat buy-and-hold and control drawdown on unseen folds, or
       not? Blunt as before. Then STOP for operator review.

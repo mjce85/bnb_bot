@@ -11,9 +11,10 @@ venv/
 data/
 reports/*.png
 reports/*.html
-# Per-run reports are regenerable; keep only the headline summary tracked.
+# Per-run reports are regenerable; keep only the headline summaries tracked.
 reports/*_in_sample.md
 reports/*_out_of_sample.md
+reports/*_robust.md
 logs/
 
 # Env / secrets — never commit
