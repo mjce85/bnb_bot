@@ -66,8 +66,10 @@ A small, fully-tested Python engine (no framework magic):
   walk-forward folds. (Honestly: the portfolio runs hotter than a single token —
   these coins are correlated — so the win is capital efficiency vs holding, not
   diversification.)
-- **It generalizes to coins it never saw** — run on 8 liquid tokens that were
-  *not* in the parameter search, it beat buy-and-hold's drawdown on **8/8**.
+- **It generalizes — emphatically.** Run *frozen* on **18 liquid tokens** over
+  their full history back to 2017 (including the 2018 bear), it beat
+  buy-and-hold's drawdown on **18/18**, cutting drawdown ~half on average. See
+  `docs/generalization.png`.
 - **A backtester we'd actually believe** — every honesty guard is enforced in
   code and tested (89 tests).
 

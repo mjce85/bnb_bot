@@ -97,10 +97,16 @@ The strategy beat buy-and-hold's **drawdown on 4/4 tokens** and its **return on
 detail in
 [`reports/search_cost_robust_summary.md`](reports/search_cost_robust_summary.md).
 
-**Generalization (the strongest overfitting check):** run on **8 liquid tokens
-the parameters were never chosen on** (XRP, ADA, DOGE, LINK, DOT, LTC, TRX, AVAX),
-the frozen entry beat buy-and-hold's drawdown on **8/8**. See
-[`reports/robustness_summary.md`](reports/robustness_summary.md).
+**Generalization (the strongest overfitting check):** the *frozen* entry, run on
+**18 liquid tokens** (14 never used to choose its parameters), each over its full
+Binance history back to 2017 — including the brutal 2018 bear our 2021-start tests
+never saw — beat buy-and-hold's drawdown on **18/18**, cutting max drawdown
+roughly in **half on average**. It made money in many coins that holders watched
+collapse (FIL +79% vs −99%, ADA +429% vs −3%, EOS −3% vs −94%).
+
+![drawdown across 18 tokens](docs/generalization.png)
+
+Detail in [`reports/generalization_summary.md`](reports/generalization_summary.md).
 
 **Traded as a portfolio (what you'd actually run):**
 
