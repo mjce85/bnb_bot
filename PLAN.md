@@ -180,8 +180,11 @@ per-token. The multi-agent search engine stays parked. Same discipline per task.
       **Holdout PASS**: drawdown beaten 4/4 tokens, return beats hold 3/4
       (BNB +48% vs +2%, BNB Sharpe 1.33 vs 0.29). `reports/search_summary.md`.
       Go confirmed → packaging.
-- [ ] **P2 — Lock the winning config.** Capture the chosen entry as a named
-      preset in code + a one-command repro script. Tests pin the preset.
+- [x] **P2 — Lock the winning config.** DONE. `bnb_bot/presets.py` freezes the
+      search winner as `VOL_TARGETED_REGIME_MOMENTUM` (strategy + rebalance band
+      + risk limits). `scripts/run_entry.py` reproduces the headline in one
+      command → `reports/entry_summary.md` (full-window drawdowns 22–37% vs hold
+      71–98%, positive return on all 4 tokens). 5 tests pin the preset.
 - [ ] **P3 — Judge-facing `README.md`.** What it is, the backtest-honesty
       guarantees, how to reproduce, the headline risk-adjusted results, the pitch.
 - [ ] **P4 — Final sweep + `FINDINGS.md` update.** Verify everything runs clean;
