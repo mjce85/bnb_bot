@@ -106,7 +106,8 @@ collapse (FIL +79% vs −99%, ADA +429% vs −3%, EOS −3% vs −94%).
 
 ![drawdown across 18 tokens](docs/generalization.png)
 
-Detail in [`reports/generalization_summary.md`](reports/generalization_summary.md).
+Detail in [`reports/generalization_summary.md`](reports/generalization_summary.md);
+per-asset equity curves in [`docs/performance_all.png`](docs/performance_all.png).
 
 **Traded as a portfolio (what you'd actually run):**
 
