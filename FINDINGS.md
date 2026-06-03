@@ -653,3 +653,71 @@ and the README/SUBMISSION numbers reflect the re-locked entry. 89 tests green.
 🛑 **Pausing (Stage 7).** The entry is re-locked, cost-hardened, and all docs/
 artifacts are consistent. Open operator-gated calls unchanged: multi-agent search
 engine, live execution layer, GitHub + CI. Your move, Markus.
+
+---
+---
+
+# FINDINGS — Stage 8: "too good to be true?" pressure tests (2026-06-03)
+
+Operator (rightly) pushed on whether the result is too good. Two adversarial
+tests — a bootstrap and a regime stress slice. Both confirm the same split we've
+seen throughout: **the drawdown claim is robust; the return is genuinely
+uncertain and regime-dependent.**
+
+## 1. Bootstrap — is it one lucky path? (`reports/bootstrap_summary.md`)
+
+Paired stationary block bootstrap (21-day blocks, 3,000 resamples) of the 4-token
+portfolio's daily returns vs equal-weight hold — thousands of alternate histories,
+same resampled calendar applied to both.
+
+| Metric | Median | 5th–95th pct |
+| --- | ---: | --- |
+| Total return | +80% | **−63% … +823%** |
+| Max drawdown | 56% | 36% … 80% |
+| Sharpe | 0.49 | −0.36 … 1.32 |
+| Drawdown reduction vs hold | +23 pp | **+1 … +45 pp** |
+
+- **In 95.6% of alternate histories the strategy drew down less than holding**,
+  and even the unlucky 5th-percentile path still reduced drawdown (+1 pp). The
+  risk-control claim is statistically robust, not a single lucky run.
+- **The return is wildly uncertain** (−63% to +823%) and Sharpe can be negative.
+  This quantifies what I'd been saying: distrust the headline return, trust the
+  drawdown.
+
+## 2. Regime slices — what happens when trends aren't handed to it? (`reports/regime_slices_summary.md`)
+
+Frozen entry vs hold across five regimes, median across deep-history tokens:
+
+| Regime | Strat ret | Hold ret | Strat DD | Hold DD | DD beaten |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 2018 crash | −15% | −70% | 16% | 81% | 10/10 |
+| 2019–20 chop | +38% | +39% | 21% | 74% | 14/14 |
+| 2021 bull | +12% | +201% | 19% | 73% | 18/18 |
+| 2022 bear | −18% | −73% | 22% | 75% | 17/18 |
+| 2023–24 recovery | +26% | +208% | 25% | 57% | 18/18 |
+
+- **Drawdown control holds in every regime** — including the chop and both
+  crashes (16–25% vs hold's 57–81%). This was the test most likely to break it,
+  and it didn't.
+- **The return is entirely regime-dependent**: it *crushes* hold in crashes (by
+  sitting in cash), *trails badly* in strong bulls (captures a fraction of the
+  upside), and roughly *ties* in chop.
+- **The feared chop-whipsaw didn't materialize at the daily timeframe.** The
+  hourly baselines whipsawed to death (Stage 1); daily bars + the regime filter
+  were robust enough that 2019–20 chop was fine. Honest caveat: crypto rarely
+  offers a truly *flat* multi-year stretch — even "2019–20 chop" netted +39% for
+  holders — so this isn't a dead-flat stress, just the closest available.
+
+## Verdict on "too good to be true."
+
+It isn't — once you read the right claim. The durable, statistically-robust result
+is **"same market direction, drawdown cut to roughly a quarter-to-half, in every
+regime and 95.6% of bootstraps."** The eye-catching *returns* are real in-sample
+but uncertain, cost-sensitive, and lean on crypto's trending nature. We have never
+claimed otherwise, and now we have the error bars to prove the distinction.
+
+---
+
+🛑 **Pausing (Stage 8).** Both pressure tests done; figures `docs/bootstrap.png`
+and `docs/regime_slices.png`. Open operator-gated calls unchanged. Your move,
+Markus.

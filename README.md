@@ -109,6 +109,16 @@ collapse (FIL +79% vs −99%, ADA +429% vs −3%, EOS −3% vs −94%).
 Detail in [`reports/generalization_summary.md`](reports/generalization_summary.md);
 per-asset equity curves in [`docs/performance_all.png`](docs/performance_all.png).
 
+**Pressure tests (does it survive scrutiny?):** a paired block **bootstrap** of
+3,000 resampled histories found the strategy beat hold's drawdown in **95.6%** of
+them (even the unlucky 5th-percentile path reduced drawdown) — though the *return*
+swung −63% to +823%, confirming the return is uncertain and the drawdown claim is
+the robust one. A **regime stress test** (2018 crash, 2019–20 chop, 2021 bull,
+2022 bear, 2023–24 recovery) showed drawdown control holds in **every** regime;
+return crushes hold in crashes, trails in bulls, ties in chop. See
+[`reports/bootstrap_summary.md`](reports/bootstrap_summary.md) and
+[`reports/regime_slices_summary.md`](reports/regime_slices_summary.md).
+
 **Traded as a portfolio (what you'd actually run):**
 
 ![portfolio vs equal-weight buy & hold](docs/portfolio.png)
