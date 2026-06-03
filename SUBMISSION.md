@@ -44,7 +44,7 @@ A small, fully-tested Python engine (no framework magic):
 - **Walk-forward evaluation + buy-and-hold benchmark** baked into every result.
 - **A bounded parameter search** with an untouched 25% holdout and one config
   chosen across all tokens — anti-overfitting by construction.
-- **83 tests** pinning the engine's honesty and the locked entry.
+- **89 tests** pinning the engine's honesty and the locked entry.
 
 ## Challenges we ran into
 
@@ -61,8 +61,13 @@ A small, fully-tested Python engine (no framework magic):
 - **Drawdown beaten on 4/4 tokens on an untouched holdout** — and 3/4 on return.
   On BNB's holdout: **+48% vs +2%, Sharpe 1.33 vs 0.29.** It held up out of
   sample.
+- **Traded as a portfolio across all four tokens: +99% vs equal-weight
+  buy-and-hold's +8%, at 55% vs 80% drawdown** — drawdown beaten in 5/5
+  walk-forward folds. (Honestly: the portfolio runs hotter than a single token —
+  these coins are correlated — so the win is capital efficiency vs holding, not
+  diversification.)
 - **A backtester we'd actually believe** — every honesty guard is enforced in
-  code and tested.
+  code and tested (89 tests).
 
 ## What we learned
 
@@ -83,7 +88,7 @@ product, even when raw return trails a roaring bull market.
 ```bash
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python scripts/run_entry.py        # headline result
-./venv/bin/python -m pytest -q                # 83 honesty/correctness tests
+./venv/bin/python -m pytest -q                # 89 honesty/correctness tests
 ```
 
 See [`README.md`](README.md) for detail, [`FINDINGS.md`](FINDINGS.md) for the

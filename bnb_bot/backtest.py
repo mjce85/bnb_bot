@@ -255,6 +255,36 @@ def _rebalance(
     if trade_notional < min_trade_usd or trade_notional < rebalance_band * equity:
         return cash, None
 
+    return execute_delta(
+        cash=cash,
+        pos=pos,
+        delta_qty=delta_qty,
+        open_price=open_price,
+        ts=ts,
+        symbol=symbol,
+        costs=costs,
+        slip=slip,
+    )
+
+
+def execute_delta(
+    *,
+    cash: float,
+    pos: Position,
+    delta_qty: float,
+    open_price: float,
+    ts: int,
+    symbol: str,
+    costs: config.CostModel,
+    slip: float,
+) -> tuple[float, Optional[Fill]]:
+    """Apply a ``delta_qty`` change to ``pos`` at ``open_price``, charging costs.
+
+    The single source of truth for fill economics — slippage moves the fill price
+    against us, swap fee + gas are charged on the realized notional. Used by both
+    the single-asset engine and the portfolio engine so they can never drift.
+    Mutates ``pos`` in place; returns the new cash and the resulting Fill.
+    """
     if delta_qty > 0:  # BUY — slippage pushes the fill price up
         eff_price = open_price * (1.0 + slip)
         notional = delta_qty * eff_price

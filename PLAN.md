@@ -200,6 +200,27 @@ per-token. The multi-agent search engine stays parked. Same discipline per task.
 
 ---
 
+## Stage 5 — Multi-asset portfolio (operator-approved 2026-06-03)
+
+Operator asked for the biggest non-overfitting upside: trade the locked entry as
+a real portfolio (the per-symbol/total-exposure risk caps finally do something).
+
+- [x] **PF1 — Portfolio engine.** DONE. `bnb_bot/portfolio.py`:
+      `run_portfolio_backtest` (shared cash, per-symbol risk + portfolio
+      total-exposure cap, sells-before-buys, common-timeline alignment) +
+      `buy_and_hold_portfolio` (analytic equal-weight). Shared fill math
+      (`execute_delta`) extracted from the single engine so they can't drift.
+      6 tests incl. a single-symbol-portfolio == single-engine equivalence anchor.
+- [x] **PF2 — Portfolio run + honest finding.** DONE. `scripts/run_portfolio.py`
+      + `reports/portfolio_summary.md` + `docs/portfolio.png`. Traded as a
+      portfolio the entry returns **+99% vs equal-weight hold +8%** at **55% vs
+      80% drawdown**, drawdown beaten **5/5 folds**. Honest correction: portfolio
+      drawdown (55%) is *higher* than the single-token average (33%) — these
+      tokens are correlated and the portfolio deploys idle cash; the win is
+      capital efficiency vs holding, not diversification.
+
+---
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).

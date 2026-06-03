@@ -94,6 +94,19 @@ The strategy beat buy-and-hold's **drawdown on 4/4 tokens** and its **return on
 **Sharpe of 1.33 vs 0.29**. Full detail in
 [`reports/search_summary.md`](reports/search_summary.md).
 
+**Traded as a portfolio (what you'd actually run):**
+
+![portfolio vs equal-weight buy & hold](docs/portfolio.png)
+
+Run across all four tokens on one shared book, the strategy returns **+99% vs an
+equal-weight buy-and-hold portfolio's +8%**, at **55% vs 80% max drawdown**, and
+beats hold's drawdown in **5 of 5 walk-forward folds**. Honest note: the
+portfolio's drawdown (55%) is *higher* than the single-token average (33%) — these
+tokens are correlated and the portfolio deploys the cash single-token runs leave
+idle, trading some calm for a lot more return. The win here is capital efficiency
+versus holding, not diversification. Detail in
+[`reports/portfolio_summary.md`](reports/portfolio_summary.md).
+
 ## Reproduce it
 
 ```bash
@@ -129,10 +142,11 @@ bnb_bot/
   risk.py         stop-loss, position/exposure caps, drawdown breaker
   metrics.py      return, drawdown, Sharpe, Sortino, Calmar, win rate, exposure
   walkforward.py  buy-and-hold benchmark + walk-forward evaluation
+  portfolio.py    multi-asset portfolio engine (shared book, exposure caps)
   report.py       markdown report + equity/drawdown plot
   presets.py      the frozen, validated submission entry
-scripts/          run_backtest · run_entry · search_params · (analysis runs)
-tests/            83 tests pinning the engine, metrics, risk, and strategies
+scripts/          run_backtest · run_entry · run_portfolio · search_params · …
+tests/            89 tests pinning the engine, metrics, risk, and strategies
 ```
 
 ## Honest limitations

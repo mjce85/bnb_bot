@@ -468,3 +468,69 @@ upside, not necessity.
 
 🛑 **Stopping for review (P4).** Stage 4 complete — searched, locked, packaged,
 all green. Nothing further runs without your go-ahead. Over to you, Markus.
+
+---
+---
+
+# FINDINGS — Stage 5: portfolio backtest (PF1–PF2, 2026-06-03)
+
+You asked for the biggest non-overfitting improvement: trade the locked entry as
+a real **portfolio** across all four tokens, not one coin at a time. Built it —
+and it produced both a strong result and an honest surprise.
+
+## 1. Traded as a portfolio, it clearly beats holding.
+
+| | Return | MaxDD | Sharpe | Calmar |
+| --- | ---: | ---: | ---: | ---: |
+| **Portfolio strategy** | **+99%** | 55% | 0.53 | 0.25 |
+| Equal-weight buy & hold | +8% | 80% | 0.37 | 0.02 |
+
+It wins on **every axis** vs the natural benchmark (an equal-weight hold of the
+same four tokens), and beats hold's drawdown in **5 of 5 walk-forward folds**.
+This is the "what you'd actually run" result — one shared book, the
+total-exposure cap finally doing real work. See `docs/portfolio.png` and
+`reports/portfolio_summary.md`.
+
+## 2. The honest surprise: diversification did *not* lower drawdown.
+
+I expected combining four sleeves to smooth the curve. It didn't: the portfolio's
+drawdown (**55%**) is *higher* than the average single-token run (**33%**). Two
+real reasons, neither flattering:
+
+- **These tokens are correlated.** BNB/BTC/ETH (and CAKE in crashes) fall
+  together, so holding all four diversifies far less than holding genuinely
+  independent bets would.
+- **The portfolio deploys idle cash.** A single-token run often sits ~60% in cash
+  (vol targeting + regime gate). The portfolio puts that cash into the *other*
+  tokens, so it runs more fully invested — which is exactly why its return is so
+  much higher than holding, but also why it carries more drawdown.
+
+So the portfolio's edge is **capital efficiency vs holding**, not a free-lunch
+drawdown reduction. I corrected the write-up to say so rather than spin it. (The
+engine *does* capture real diversification when assets are decorrelated — there's
+a unit test proving it on anti-correlated synthetic series; this token set just
+isn't decorrelated.)
+
+## 3. Engineering notes.
+
+- New `bnb_bot/portfolio.py`: shared-book multi-asset engine, per-symbol risk +
+  a portfolio total-exposure cap, common-timeline alignment, sells-before-buys.
+- Fill economics (`execute_delta`) were **extracted and shared** with the
+  single-asset engine, with a test asserting a one-symbol portfolio reproduces
+  the single engine bar-for-bar — so they can never silently diverge.
+- 89 tests green; `black` clean.
+
+## 4. Takeaway.
+
+The submission now has two honest framings, both backed by the same trusted
+engine: the **single-token entry** (tightest drawdown control, 22–37%) and the
+**portfolio** (best return-vs-hold story, +99% vs +8%, runs hotter at 55% DD).
+Either is a legitimate, defensible Track-2 entry. Nothing here required parameter
+tuning, so no new overfitting risk was introduced.
+
+---
+
+🛑 **Stopping for review (Stage 5).** The portfolio improvement is done and
+reported honestly, including where my hypothesis was wrong. Still held for your
+explicit go-ahead: the multi-agent search engine, the live execution layer, and
+any demo polish. Over to you, Markus.
