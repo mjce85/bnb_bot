@@ -2,25 +2,28 @@
 // bnb_bot — Volatility-Targeted Regime Momentum (single-symbol TradingView port)
 //
 // Faithful-ish port of the locked entry (bnb_bot/presets.py). Use on a DAILY chart.
-// Long-only. Each bar it computes a TARGET WEIGHT (0 = cash, 1 = fully invested):
-//   * Regime gate:  hold only while close > 50-day SMA
-//   * Momentum:     and only while EMA(12) > EMA(26)
-//   * Vol sizing:   weight = min(maxWeight, targetVol / realised_daily_vol)
-//   * Stop-loss:    exit if price is 10% below average entry
-//   * DD breaker:   while >20% below the since-flat equity peak, don't ADD exposure
-// then rebalances toward that weight, but only when off-target by > rebalance band.
+// Long-only. The strategy is long only while ALL of these hold, else flat (cash):
+//   * Regime gate:  close > 50-day SMA
+//   * Momentum:     EMA(12) > EMA(26)
+//   * DD breaker:   not currently >20% below the since-flat equity peak (blocks new entries)
+// On entry it is sized by VOLATILITY: weight = min(maxWeight, targetVol / realised_daily_vol),
+// so a calm market gets a bigger position than a wild one. It exits fully on signal-off
+// or a 10% stop-loss.
+//
+// NOTE: it enters ONCE at the vol-sized weight and holds (no per-bar re-trimming). That
+// keeps the order count sane AND mirrors the Python engine, whose 15% rebalance band
+// means it rarely resizes mid-hold anyway.
 //
 // CAVEATS (why it won't match the Python backtest exactly):
-//   - TradingView's money-management / fill model differs slightly from our engine.
-//   - Costs here are a flat 0.35% commission (0.25% swap + 0.10% slippage); the
-//     fixed $0.30 gas-per-trade is omitted (negligible at size).
-//   - This is SINGLE-symbol; the Python result also has a 4-token portfolio layer.
-//   - Orders are evaluated on bar close and fill at the NEXT bar's open (no lookahead).
+//   - TradingView money-management / fill model differs slightly from our engine.
+//   - Costs here are a flat 0.35% commission (swap + slippage); $0.30 gas/trade omitted.
+//   - SINGLE-symbol; the Python headline also has a 4-token portfolio layer.
+//   - Orders evaluate on bar close and fill at the NEXT bar's open (no lookahead).
 
 strategy("bnb_bot — Vol-Targeted Regime Momentum", overlay=true,
      initial_capital=10000, currency=currency.USD,
      commission_type=strategy.commission.percent, commission_value=0.35,
-     pyramiding=1000, calc_on_every_tick=false, process_orders_on_close=false)
+     calc_on_every_tick=false, process_orders_on_close=false)
 
 // === Inputs (locked-entry defaults) ===
 trendLen  = input.int(50,    "Regime trend SMA length")
@@ -29,7 +32,6 @@ slowLen   = input.int(26,    "Momentum slow EMA")
 targetVol = input.float(0.015,"Target volatility (per day)", step=0.005)
 volLen    = input.int(15,    "Volatility lookback (days)")
 maxWeight = input.float(1.0, "Max weight (0..1)", step=0.1, minval=0.0, maxval=1.0)
-rebBand   = input.float(0.15,"Rebalance band (fraction of equity)", step=0.01)
 stopFrac  = input.float(0.10,"Stop-loss fraction", step=0.01)
 ddHalt    = input.float(0.20,"Drawdown breaker (fraction)", step=0.01)
 
@@ -42,41 +44,29 @@ rvol = ta.stdev(ret, volLen)            // realised daily volatility
 
 regimeOK   = close > sma
 momentumOK = emaF > emaS
-volScale   = rvol > 0 ? math.min(maxWeight, targetVol / rvol) : maxWeight
-rawWeight  = (regimeOK and momentumOK) ? volScale : 0.0
+weight     = rvol > 0 ? math.min(maxWeight, targetVol / rvol) : maxWeight
 
 // === Campaign equity peak (resets when flat) + drawdown breaker ===
 var float campPeak = strategy.equity
 isFlat = strategy.position_size == 0
 campPeak := isFlat ? strategy.equity : math.max(campPeak, strategy.equity)
 dd = campPeak > 0 ? (campPeak - strategy.equity) / campPeak : 0.0
+breakerBlocks = dd >= ddHalt          // halt NEW entries during a deep drawdown
 
-curValue  = strategy.position_size * close
-curWeight = strategy.equity > 0 ? curValue / strategy.equity : 0.0
+wantLong = regimeOK and momentumOK
+stopHit  = strategy.position_size > 0 and close <= strategy.position_avg_price * (1.0 - stopFrac)
 
-// Breaker: in deep drawdown, never increase above the weight already held.
-targetWeight = dd >= ddHalt ? math.min(rawWeight, curWeight) : rawWeight
+// === Orders: enter vol-sized once, exit fully on signal-off / stop ===
+if strategy.position_size == 0 and wantLong and not breakerBlocks and close > 0
+    qty = (weight * strategy.equity) / close
+    strategy.entry("long", strategy.long, qty=qty)
 
-// Stop-loss: underwater past the threshold -> force exit.
-stopHit = strategy.position_size > 0 and close <= strategy.position_avg_price * (1.0 - stopFrac)
-if stopHit
-    targetWeight := 0.0
-
-// === Rebalance toward target weight, only outside the band ===
-targetValue = targetWeight * strategy.equity
-deltaValue  = targetValue - curValue
-if math.abs(deltaValue) > rebBand * strategy.equity and close > 0
-    targetQty = targetValue / close
-    diffQty   = targetQty - strategy.position_size
-    if diffQty > 0
-        strategy.order("rebal_buy",  strategy.long,  qty=diffQty)
-    else if diffQty < 0
-        // selling part/all of the long (qty <= current size, so it won't flip short)
-        strategy.order("rebal_sell", strategy.short, qty=-diffQty)
+if strategy.position_size > 0 and (not wantLong or stopHit)
+    strategy.close("long")
 
 // === Visuals ===
 plot(sma,  "50-day trend", color=color.orange, linewidth=2)
 plot(emaF, "EMA fast", color=color.new(color.blue, 60))
 plot(emaS, "EMA slow", color=color.new(color.gray, 60))
-bgcolor(targetWeight > 0 ? color.new(color.green, 88) : na, title="invested")
-plot(targetWeight, "target weight", color=color.green, display=display.data_window)
+bgcolor(strategy.position_size > 0 ? color.new(color.green, 88) : na, title="invested")
+plot(weight, "vol-sized weight", color=color.green, display=display.data_window)
