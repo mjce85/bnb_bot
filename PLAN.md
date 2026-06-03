@@ -239,6 +239,20 @@ risk; this only strengthens or honestly weakens the existing claims.
 
 ---
 
+## Stage 7 — Cost-robust re-lock (operator-approved 2026-06-03)
+
+Fix the Stage 6 cost-fragility, disciplined (no hand-picking).
+
+- [x] **CR1 — Cost-aware search.** DONE. `scripts/search_cost_robust.py`: same
+      guards as P1 + wider rebalance bands + ranking under a 2× cost assumption.
+      Winner (holdout 4/4): vol_lookback 30→15, rebalance_band 0.03→0.15.
+- [x] **CR2 — Re-lock + regenerate.** DONE. Updated `presets.py` + tests; re-ran
+      entry/portfolio/robustness/figures; updated README/SUBMISSION/FINDINGS
+      numbers. Cost-robustness fixed (2× costs +1%→+15%, 3× −47%→−18%); 1× return
+      improved too (BNB +191%→+279%); 8/8 out-of-universe still holds.
+
+---
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).

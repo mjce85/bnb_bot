@@ -592,3 +592,64 @@ quoted without its caveat.
 operator-gated calls remain: lower-turnover variant (cheap, would harden returns
 to cost), the multi-agent search engine, the live execution layer, GitHub + CI.
 Say the word on any.
+
+---
+---
+
+# FINDINGS — Stage 7: cost-robust re-lock (2026-06-03)
+
+Stage 6 found the entry's returns were cost-fragile (it traded ~500×). Rather than
+hand-pick a fix, I re-ran the disciplined search with that weakness in the
+objective, and re-locked the entry to the validated winner.
+
+## What changed.
+
+`scripts/search_cost_robust.py`: same guards as the original search (train-only
+ranking, one config across all tokens, drawdown gate, untouched holdout) plus two
+changes that *target* cost-robustness without peeking — wider rebalance bands in
+the grid, and **ranking under a conservative 2× cost assumption** so high-turnover
+configs are penalized by the objective itself. 300 configs.
+
+Winner, holdout-validated (drawdown beaten **4/4**, BNB Sharpe 1.26, ETH +39% vs
+−38%): same `target_vol=0.015` and `trend_period=50`, but **`vol_lookback`
+15** and **`rebalance_band` 0.15** (was 30 / 0.03). The wider band roughly
+quarters turnover. The locked preset in `bnb_bot/presets.py` was updated to this
+config; tests re-pin it.
+
+## The payoff — the Stage 6 weakness is largely fixed, returns even improved.
+
+Portfolio at escalating costs (was → now):
+
+| Costs | Old return | New return |
+| ---: | ---: | ---: |
+| 1× | +99% | +85% |
+| 2× | +1% | **+15%** |
+| 3× | −47% | **−18%** |
+
+It now **stays positive at 2× costs** and roughly halves the 3× loss, while
+drawdown control is unchanged. And lower turnover *helped at 1× too* — the
+single-token entry returns rose (BNB +191%→**+279%** at 23% drawdown, Calmar
+**1.22 vs holding's 1.02**; ETH +35%→+77%; CAKE +20%→+34%). Out-of-universe
+generalization still holds: drawdown beaten on **8/8** unseen tokens.
+
+So lowering turnover was a near-free win: more cost-robust, higher return, same
+risk control. (It's not literally free — the trade-off is the strategy reacts a
+bit more slowly; the holdout confirms that didn't hurt out of sample.)
+
+## Honesty note on method.
+
+This re-tune is *not* the overfitting reflex I warned against in Stage 6. The
+difference: I didn't pick `band=0.15` because it maximized full-data return; the
+disciplined search picked it under a conservative cost objective, and it was
+validated once on the untouched holdout. The original (band 0.03) search remains
+recorded in `reports/search_summary.md`; the cost-robust one is in
+`reports/search_cost_robust_summary.md`.
+
+All regenerated artifacts (entry, portfolio, robustness summaries; both figures)
+and the README/SUBMISSION numbers reflect the re-locked entry. 89 tests green.
+
+---
+
+🛑 **Pausing (Stage 7).** The entry is re-locked, cost-hardened, and all docs/
+artifacts are consistent. Open operator-gated calls unchanged: multi-agent search
+engine, live execution layer, GitHub + CI. Your move, Markus.

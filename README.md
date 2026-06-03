@@ -79,20 +79,23 @@ are a fraction of holding's, on every token.*
 
 | Token | Strategy return | B&H return | Strategy maxDD | B&H maxDD |
 | --- | ---: | ---: | ---: | ---: |
-| BNB | +191% | +1781% | **22%** | 71% |
-| BTC | +71% | +151% | **37%** | 77% |
-| ETH | +35% | +175% | **36%** | 79% |
-| CAKE | **+20%** | −92% | **36%** | 98% |
+| BNB | +279% | +1781% | **23%** | 71% |
+| BTC | +73% | +151% | **37%** | 77% |
+| ETH | +77% | +175% | **32%** | 79% |
+| CAKE | **+34%** | −92% | **31%** | 98% |
 
 Drawdown is roughly **one-third to one-half** of buy-and-hold across the board,
 and the strategy stays *positive even in CAKE, which lost 92% over the period.*
+BNB's Calmar (return per unit drawdown) is **1.22 vs holding's 1.02** — more
+return per unit of risk than just holding the best performer.
 
 **Untouched holdout (most recent 25%, scored once) — the honesty test:**
 
 The strategy beat buy-and-hold's **drawdown on 4/4 tokens** and its **return on
-3/4** on data the search never touched. On BNB it returned **+48% vs +2%** at a
-**Sharpe of 1.33 vs 0.29**. Full detail in
-[`reports/search_summary.md`](reports/search_summary.md).
+3/4** on data the search never touched. On BNB it returned **+46% vs +2%** at a
+**Sharpe of 1.26 vs 0.29**; on ETH **+39% vs −38%** (Sharpe 1.02 vs −0.13). Full
+detail in
+[`reports/search_cost_robust_summary.md`](reports/search_cost_robust_summary.md).
 
 **Generalization (the strongest overfitting check):** run on **8 liquid tokens
 the parameters were never chosen on** (XRP, ADA, DOGE, LINK, DOT, LTC, TRX, AVAX),
@@ -103,15 +106,16 @@ the frozen entry beat buy-and-hold's drawdown on **8/8**. See
 
 ![portfolio vs equal-weight buy & hold](docs/portfolio.png)
 
-Run across all four tokens on one shared book, the strategy returns **+99% vs an
-equal-weight buy-and-hold portfolio's +8%**, at **55% vs 80% max drawdown**, and
+Run across all four tokens on one shared book, the strategy returns **+85% vs an
+equal-weight buy-and-hold portfolio's +8%**, at **57% vs 80% max drawdown**, and
 beats hold's drawdown in **5 of 5 walk-forward folds**. Two honest caveats: (a)
-the portfolio's drawdown (55%) is *higher* than the single-token average (33%) —
+the portfolio's drawdown (57%) is *higher* than the single-token average (31%) —
 these tokens are correlated and the portfolio deploys idle cash, so the win is
-capital efficiency vs holding, not diversification; (b) **that +99% return is
-cost-fragile** — at 2× our assumed costs it falls to ~+1%, at 3× it goes negative
-(the strategy trades a lot). The **drawdown control survives even at 3× costs**;
-the return edge does not. Detail in
+capital efficiency vs holding, not diversification; (b) the return is somewhat
+**cost-sensitive** (the strategy trades) — it stays positive at 2× our assumed
+costs (**+15%**) and goes negative only at 3× (−18%), while the **drawdown control
+survives at every cost level**. (This is after deliberately re-tuning turnover
+down to harden it — see `FINDINGS.md` Stage 7.) Detail in
 [`reports/portfolio_summary.md`](reports/portfolio_summary.md) and
 [`reports/robustness_summary.md`](reports/robustness_summary.md).
 
@@ -123,8 +127,11 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 # Reproduce the headline entry result (fetches free Binance history via ccxt):
 ./venv/bin/python scripts/run_entry.py        # -> reports/entry_summary.md
 
-# Re-run the holdout-validated parameter search:
-./venv/bin/python scripts/search_params.py    # -> reports/search_summary.md
+# Re-run the holdout-validated search that picked the locked entry:
+./venv/bin/python scripts/search_cost_robust.py   # -> reports/search_cost_robust_summary.md
+
+# Stress tests: cost sensitivity + out-of-universe generalization:
+./venv/bin/python scripts/run_robustness.py   # -> reports/robustness_summary.md
 
 # Run any single strategy/token/window and get a report + equity/drawdown plot:
 ./venv/bin/python scripts/run_backtest.py --symbol BNB/USDT \
@@ -159,13 +166,13 @@ tests/            89 tests pinning the engine, metrics, risk, and strategies
 
 ## Honest limitations
 
-- **Costs are modelled, not measured on-venue — and returns are sensitive to
-  them.** We charge PancakeSwap-style fees on Binance price data; real on-chain
-  slippage would differ (and is size-dependent). We stress-tested this: the
-  **drawdown control is robust** (holds at 3× costs), but the **headline returns
-  are not** — at 2× assumed costs the portfolio's +99% falls to ~+1%. Quote the
-  return as best-case-cost; the risk-control story is the durable claim. Lower
-  turnover (a wider rebalance band) would harden returns to cost.
+- **Costs are modelled, not measured on-venue.** We charge PancakeSwap-style
+  fees on Binance price data; real on-chain slippage would differ (and is size-
+  dependent). We stress-tested this and re-tuned turnover down to harden it: the
+  **drawdown control is robust** (holds at 3× costs) and the portfolio return now
+  **stays positive at 2× assumed costs (+15%)**, going negative only at 3×.
+  Still, treat the headline return as cost-dependent; the risk-control story is
+  the more durable claim.
 - **Long-only spot.** In a strong, steady bull market, buy-and-hold out-returns
   us — we trade upside for much lower drawdown. That trade-off is the point.
 - **One historical path.** 2021–2026 is a single sequence of regimes. The

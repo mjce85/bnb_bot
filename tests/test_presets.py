@@ -18,8 +18,8 @@ def test_entry_preset_values_are_locked():
     assert ENTRY.name == "vol_targeted_regime_momentum"
     assert ENTRY.target_vol == 0.015
     assert ENTRY.trend_period == 50
-    assert ENTRY.vol_lookback == 30
-    assert ENTRY.rebalance_band == 0.03
+    assert ENTRY.vol_lookback == 15
+    assert ENTRY.rebalance_band == 0.15
     assert ENTRY.risk_limits.max_position_frac == 1.0
     assert ENTRY.risk_limits.max_drawdown_halt == 0.20
     assert ENTRY.risk_limits.stop_loss_frac == 0.10
@@ -36,7 +36,7 @@ def test_build_strategy_is_a_signal_source_with_expected_composition():
     assert strat.name == "momentum_ema_cross_regime50_voltgt"
     assert strat.params["target_vol"] == 0.015
     assert strat.params["regime_trend_period"] == 50
-    assert strat.params["vol_lookback"] == 30
+    assert strat.params["vol_lookback"] == 15
 
 
 def test_build_risk_carries_the_locked_limits():

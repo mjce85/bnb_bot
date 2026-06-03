@@ -50,13 +50,16 @@ class EntryPreset:
 
 
 # The validated entry: volatility-targeted, regime-gated momentum, daily bars.
-# Frozen from the P1 search holdout-validated winner.
+# Re-locked from the cost-robust search (ranked at 2x assumed costs, wider
+# rebalance bands, holdout-validated) after Stage 6 found the returns were
+# cost-fragile. The wider rebalance band (0.15) roughly quarters turnover, so the
+# return survives realistic on-chain costs while drawdown control is unchanged.
 VOL_TARGETED_REGIME_MOMENTUM = EntryPreset(
     name="vol_targeted_regime_momentum",
     target_vol=0.015,
     trend_period=50,
-    vol_lookback=30,
-    rebalance_band=0.03,
+    vol_lookback=15,
+    rebalance_band=0.15,
     risk_limits=config.RiskLimits(
         max_position_frac=1.0,
         max_total_exposure=1.0,

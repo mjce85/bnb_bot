@@ -29,7 +29,7 @@ tokens. Our entry is **volatility-targeted, regime-gated momentum**:
 - A **risk layer** (stop-loss + drawdown breaker) backstops the position.
 
 The result, over 2021–2026 daily across BNB/CAKE/ETH/BTC: **max drawdown of
-22–37% versus buy-and-hold's 71–98%** — roughly a third to a half — while staying
+23–37% versus buy-and-hold's 71–98%** — roughly a third to a half — while staying
 profitable on every token, including CAKE, which lost 92% buy-and-hold.
 
 ## How we built it
@@ -59,10 +59,10 @@ A small, fully-tested Python engine (no framework magic):
 ## Accomplishments we're proud of
 
 - **Drawdown beaten on 4/4 tokens on an untouched holdout** — and 3/4 on return.
-  On BNB's holdout: **+48% vs +2%, Sharpe 1.33 vs 0.29.** It held up out of
-  sample.
-- **Traded as a portfolio across all four tokens: +99% vs equal-weight
-  buy-and-hold's +8%, at 55% vs 80% drawdown** — drawdown beaten in 5/5
+  On BNB's holdout: **+46% vs +2%, Sharpe 1.26 vs 0.29**; on ETH **+39% vs −38%.**
+  It held up out of sample.
+- **Traded as a portfolio across all four tokens: +85% vs equal-weight
+  buy-and-hold's +8%, at 57% vs 80% drawdown** — drawdown beaten in 5/5
   walk-forward folds. (Honestly: the portfolio runs hotter than a single token —
   these coins are correlated — so the win is capital efficiency vs holding, not
   diversification.)
@@ -77,9 +77,10 @@ There is no easy long-only alpha in liquid crypto — we proved it to ourselves
 with blunt negative results. But there *is* a durable edge in **discipline**:
 cutting drawdown in half, consistently and out-of-sample, is a real, defensible
 product, even when raw return trails a roaring bull market. We also learned where
-*not* to trust ourselves: stress-testing showed our headline **returns are
-fragile to costs** (the strategy trades a lot), while the **drawdown control
-holds even at 3× costs** — so we lead with the risk story, not the return.
+*not* to trust ourselves: stress-testing showed our returns were **fragile to
+costs** (the strategy traded a lot), so we re-tuned turnover down — returns now
+**survive 2× our assumed costs**, and the **drawdown control holds even at 3×**.
+We still lead with the risk story, not the return.
 
 ## What's next
 
