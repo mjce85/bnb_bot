@@ -167,6 +167,28 @@ separate explicit go-ahead (big/expensive). Same discipline per task.
 
 ---
 
+## Stage 4 — Bounded search + package (operator-approved 2026-06-03)
+
+Operator chose: short, walk-forward-validated parameter search, **then package**
+the entry. Two hard anti-overfit guards: (1) an untouched 25% holdout the search
+never sees, validated once; (2) one config selected across ALL tokens, never
+per-token. The multi-agent search engine stays parked. Same discipline per task.
+
+- [x] **P1 — Bounded parameter search.** DONE. 120 configs, train-only ranking,
+      single config across tokens. Winner: target_vol=0.015, trend_period=50,
+      vol_lookback=30, rebalance_band=0.03 — on a stable plateau, not a spike.
+      **Holdout PASS**: drawdown beaten 4/4 tokens, return beats hold 3/4
+      (BNB +48% vs +2%, BNB Sharpe 1.33 vs 0.29). `reports/search_summary.md`.
+      Go confirmed → packaging.
+- [ ] **P2 — Lock the winning config.** Capture the chosen entry as a named
+      preset in code + a one-command repro script. Tests pin the preset.
+- [ ] **P3 — Judge-facing `README.md`.** What it is, the backtest-honesty
+      guarantees, how to reproduce, the headline risk-adjusted results, the pitch.
+- [ ] **P4 — Final sweep + `FINDINGS.md` update.** Verify everything runs clean;
+      record the locked config and holdout result. STOP for operator review.
+
+---
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).
