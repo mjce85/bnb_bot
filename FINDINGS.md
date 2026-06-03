@@ -721,3 +721,47 @@ claimed otherwise, and now we have the error bars to prove the distinction.
 🛑 **Pausing (Stage 8).** Both pressure tests done; figures `docs/bootstrap.png`
 and `docs/regime_slices.png`. Open operator-gated calls unchanged. Your move,
 Markus.
+
+---
+---
+
+# FINDINGS — Stage 9: parameter sensitivity (why 50-SMA, why MACD 12/26)
+
+Swept trend window {20,30,50,100,200} × MACD {8/21, 12/26, 19/39} on the
+untouched holdout — per asset (18 tokens) and on the 4-token portfolio — to check
+whether the locked choice is justified or arbitrary. **Read as a sensitivity map,
+not a re-selection: picking the best-on-holdout config would burn the holdout.**
+`reports/param_sweep_summary.md`, `docs/param_sweep.png`.
+
+## What it shows.
+
+- **The core drawdown win is robust to ALL these settings** — every one of the 15
+  configs beat buy-and-hold drawdown on **18/18 tokens**. The result is a broad
+  plateau, not a knife-edge parameter pick.
+- **On the portfolio (the decision-relevant view), 50 is well-justified.** The
+  good Calmar zone is the *middle* (30–100-day); the corners are bad — **20-day
+  whipsaws** (Calmar ~0 to −0.34) and **the classic 200-day is the worst**
+  (Calmar −0.27 to −0.53: too slow, re-enters late, gives back too much). The
+  locked 50/12-26 sits at Calmar 0.50, solidly in the green.
+- **MACD barely matters.** 8/21, 12/26, 19/39 are all in the same ballpark —
+  which *vindicates* leaving it at the textbook 12/26 untuned: it isn't a
+  sensitive lever, so tuning it would only invite overfitting for no real gain.
+- **Honest caveat:** on this particular holdout, **100-day/12-26 edged 50-day**
+  (portfolio Calmar 0.63 vs 0.50; lower per-asset drawdown too). 50 is *on* the
+  good plateau but isn't uniquely optimal. I did **not** re-lock to 100 — that
+  would be fitting to the holdout, the exact sin our pitch rejects. The takeaway
+  is "50 is a sound, defensible point on a wide plateau," not "50 is the peak."
+
+## Why slower lowers single-asset drawdown but hurts the portfolio.
+
+The left heatmap (slower = lower drawdown) and the right (200-day is bad) look
+contradictory but aren't: a very slow filter keeps you in cash more, so per-asset
+drawdown drops — but it also re-enters trends late and captures too little return,
+so on the portfolio (where return drives Calmar) it underperforms. 50 trades a
+little more drawdown for enough return to come out ahead.
+
+---
+
+🛑 **Pausing (Stage 9).** Sensitivity mapped; locked config confirmed to sit on a
+stable plateau (held the discipline — no holdout re-fit). Open operator-gated
+calls unchanged. Your move, Markus.
