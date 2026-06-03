@@ -45,10 +45,10 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
 - [x] **T2 — data.py.** DONE (commit da1ff52). ccxt Binance fetch + parquet
       cache + `assert_contiguous` fail-loud gap detection; 8 tests green; live
       fetch smoke-tested. **Overnight loop: start here, at T3.**
-- [ ] **T3 — backtest.py engine.** Walk candles; signal at *t* sees only ≤ *t*;
-      fill at *t+1* open; apply fees+slippage+gas; track positions + equity
-      curve. **Tests assert no-lookahead and exact fee math** on a hand-computed
-      fixture. This is the credibility core — over-test it.
+- [x] **T3 — backtest.py engine.** DONE (commit 5e49753). Event-driven
+      target-weight engine: signal at *t* from causal slice, fill at *t+1* open,
+      fees+slippage+gas on every fill; equity curve + fills. 9 tests assert
+      no-lookahead (future-invariance + fill timing) and exact fee math.
 - [ ] **T4 — metrics.py.** Equity curve -> total return, max drawdown, Sharpe,
       Sortino, Calmar, win rate, exposure %. Tests vs hand-computed values.
 - [ ] **T5 — risk.py.** Position sizing (fraction of equity, capped), max-DD
