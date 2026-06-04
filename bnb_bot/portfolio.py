@@ -36,7 +36,7 @@ from bnb_bot.backtest import (
     _clamp_weight,
     execute_delta,
 )
-from bnb_bot.types import Candle, Fill, Position
+from bnb_bot.types import Fill, Position
 
 
 @dataclass

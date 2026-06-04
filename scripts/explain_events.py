@@ -59,7 +59,7 @@ def main() -> int:
     strat = ENTRY.build_strategy()  # pure -> callable per prefix
     weights = [strat.signal(candles[: i + 1]) for i in range(len(candles))]
 
-    tp, fast, slow, vl = ENTRY.trend_period, 12, 26, ENTRY.vol_lookback
+    tp, fast, slow = ENTRY.trend_period, 12, 26
     sma = [
         statistics.mean(closes[max(0, i - tp + 1) : i + 1]) if i >= tp - 1 else None
         for i in range(len(closes))

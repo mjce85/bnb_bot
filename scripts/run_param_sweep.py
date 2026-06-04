@@ -35,7 +35,6 @@ from bnb_bot.portfolio import (
     run_portfolio_backtest,
 )  # noqa: E402
 from bnb_bot.presets import VOL_TARGETED_REGIME_MOMENTUM as ENTRY  # noqa: E402
-from bnb_bot.risk import RuleBasedRisk  # noqa: E402
 from bnb_bot.strategy import (  # noqa: E402
     Momentum,
     MomentumParams,
