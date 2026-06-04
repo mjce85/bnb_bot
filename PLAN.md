@@ -253,6 +253,38 @@ Fix the Stage 6 cost-fragility, disciplined (no hand-picking).
 
 ---
 
+## Stage 10 — Package as a CMC Skill (operator-approved 2026-06-04)
+
+Operator chose the **clean strategy skill first** (Binance/ccxt data retained;
+CMC Agent Hub integration parked as a scoped follow-on). Worked autonomously
+through the open packaging tasks from `docs/TRACK2-GAP.md`.
+
+- [x] **PK1 — Learn the real `SKILL.md` format.** DONE. Fetched
+      `cmc-api-crypto/SKILL.md` from CoinMarketCap's official repo: YAML
+      frontmatter (`name`, `description` w/ triggers, `user-invocable`,
+      `allowed-tools`) + markdown workflow body + `references/`. It is the same
+      skill format Claude Code uses; install = copy the folder.
+- [x] **PK2 — Formal `STRATEGY-SPEC.md`.** DONE. Self-contained backtestable
+      spec at repo root: signal math (regime gate → EMA momentum → vol target),
+      execution model (next-bar fill, rebalance band), risk rules, evaluation
+      protocol, locked params, results, limitations. Precise to the code.
+- [x] **PK3 — The CMC Skill.** DONE. `skills/risk-controlled-momentum/SKILL.md`
+      (CMC format) + `skills/README.md` (install). Documents the workflow,
+      honesty guards, locked params, results; drives the existing engine.
+- [x] **PK4 — Confirm submission mechanics.** DONE. BNB HACK Track 2: submit on
+      DoraHacks, lock **21 Jun 2026 12:00 UTC**. Track 2 prizes $3k/$2k/$1k +
+      three $2k special prizes. ≥1 sponsor capability required (a CMC Skill
+      counts). **Finding:** CMC's Track 2 page frames the deliverable as "a
+      backtestable spec *using the CMC Agent Hub & Data API*" — the Agent Hub is
+      more central than the gap doc assumed. Flagged for operator (see FINDINGS
+      Stage 10 + `docs/TRACK2-GAP.md`).
+- [x] **PK5 — Sweep.** DONE. README (packaging section + layout), PLAN, FINDINGS,
+      TRACK2-GAP updated; 89 tests green; `black` clean (40 files). Atomic commits.
+
+**Open operator decision (the live one):** wire in the CMC Agent Hub as a signal
+source (competes for "best use of CMC Data & Signal" $2k + matches the Track 2
+framing) vs. ship the clean skill as-is. See FINDINGS Stage 10.
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).

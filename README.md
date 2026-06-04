@@ -136,6 +136,24 @@ down to harden it — see `FINDINGS.md` Stage 7.) Detail in
 [`reports/portfolio_summary.md`](reports/portfolio_summary.md) and
 [`reports/robustness_summary.md`](reports/robustness_summary.md).
 
+## Packaged as a CMC Skill
+
+The strategy ships as a **CMC Skill** — the lightweight, folder-based format from
+[CoinMarketCap's official skills repo](https://github.com/coinmarketcap-official/skills-for-ai-agents-by-CoinMarketCap):
+a `SKILL.md` workflow doc an AI agent reads to operate the strategy. This is the
+Track 2 deliverable ("Skills that generate backtestable trading strategies from
+market data") and satisfies the hackathon's sponsor-capability requirement.
+
+- **[`skills/risk-controlled-momentum/SKILL.md`](skills/risk-controlled-momentum/SKILL.md)** —
+  the skill: when to use it, the honesty guards, and the step-by-step workflow.
+- **[`STRATEGY-SPEC.md`](STRATEGY-SPEC.md)** — the formal, self-contained
+  backtestable spec (precise enough to re-implement or re-run on a held-out
+  window after submission lock).
+
+Unlike CoinMarketCap's example skills (data-access references for the CMC API),
+this is a *strategy* skill. Consuming the CMC Agent Hub & Data API as a live
+signal source is a scoped follow-on, not yet wired in.
+
 ## Reproduce it
 
 ```bash
@@ -179,6 +197,8 @@ bnb_bot/
   presets.py      the frozen, validated submission entry
 scripts/          run_backtest · run_entry · run_portfolio · search_params · …
 tests/            89 tests pinning the engine, metrics, risk, and strategies
+skills/           the CMC Skill packaging (risk-controlled-momentum/SKILL.md)
+STRATEGY-SPEC.md  the formal, self-contained backtestable spec
 ```
 
 ## Honest limitations

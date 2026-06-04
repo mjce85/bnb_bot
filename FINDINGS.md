@@ -765,3 +765,95 @@ little more drawdown for enough return to come out ahead.
 🛑 **Pausing (Stage 9).** Sensitivity mapped; locked config confirmed to sit on a
 stable plateau (held the discipline — no holdout re-fit). Open operator-gated
 calls unchanged. Your move, Markus.
+
+---
+---
+
+# FINDINGS — Stage 10: packaged as a CMC Skill (2026-06-04)
+
+You approved the **clean strategy skill first** and went to sleep, asking me to
+work through all the open packaging tasks autonomously. Done. **The entry is now
+packaged as a CMC Skill, the formal spec is written, submission mechanics are
+confirmed, and everything is green.** One finding below changes the weight of the
+one decision still on your plate — read section 3.
+
+## 1. What I built (all local, reversible, no money, no remote push).
+
+- **`STRATEGY-SPEC.md`** (repo root) — the formal, self-contained "backtestable
+  spec" Track 2 literally asks for. It pins the signal math (regime gate → EMA
+  momentum → volatility targeting), the execution model (next-bar fill, 0.15
+  rebalance band), the risk rules, the evaluation protocol, the locked
+  parameters, the results, and the limitations — precise enough that a judge can
+  re-implement it or re-run our code on a post-lock held-out window.
+- **`skills/risk-controlled-momentum/SKILL.md`** — the entry packaged in
+  CoinMarketCap's real Skill format (I fetched a live example, `cmc-api-crypto/
+  SKILL.md`, to match it exactly: YAML frontmatter + a step-by-step workflow
+  body). It documents when to use the skill, the three honesty guards, the
+  workflow commands, the locked params, and the headline results.
+- **`skills/README.md`** — install instructions (`cp -r` the folder), matching
+  CMC's convention.
+- Swept the docs: README has a new "Packaged as a CMC Skill" section + updated
+  layout; PLAN has a Stage 10 log; `docs/TRACK2-GAP.md` is updated to reflect the
+  socket is now built. **89 tests green, `black` clean (40 files).**
+
+The key insight that made this easy: a "CMC Skill" is exactly the same lightweight
+`SKILL.md` format Claude Code itself uses — a folder + a markdown workflow doc.
+No framework. Our skill is a *strategy* skill (generate + backtest), which is rarer
+than CMC's example *data-access* skills and is precisely what Track 2 wants.
+
+## 2. Submission mechanics (confirmed, no surprises).
+
+- Submit on **DoraHacks** (`dorahacks.io/hackathon/bnbhack-twt-cmc`).
+- **Lock: 21 Jun 2026, 12:00 UTC** — ~17 days out as of today.
+- Track 2 prizes: **$3k / $2k / $1k**, plus three **$2k special prizes** (best use
+  of CMC Data & Signal, Trust Wallet Agent Kit, BNB AI Agent SDK) that stack.
+- Hard rule: **≥1 sponsor capability**. Being packaged as a CMC Skill satisfies
+  this. Using all three "scores highest with judges."
+- Track 2 judging note (from the announcement): the agent is **re-run on a
+  held-out market window after submission lock** — which is exactly what our
+  no-lookahead / holdout discipline was built for.
+
+## 3. The finding that changes the one open decision.
+
+When you went to sleep we'd framed the **CMC Agent Hub integration** as pure
+upside — a nice-to-have for a special prize. The submission research sharpened
+that. CoinMarketCap's own Track 2 page describes the expected deliverable as:
+
+> "a backtestable spec **using the CMC Agent Hub & Data API**, with pre-computed
+> indicators and Skills Marketplace integration."
+
+So consuming CMC data is **more central to Track 2 than we assumed** — closer to
+the expected stack than a bonus. My honest read:
+
+- The clean skill **is a valid, eligible entry** (a CMC Skill = the CMC capability;
+  the hard rule is met) and it's the *honest* one — our backtest genuinely needs
+  Binance history, which CMC's free tier doesn't have.
+- But wiring the Agent Hub in as a **live signal source** (mapping our regime/
+  momentum gate to CMC's pre-computed regime/risk flags) is likely the difference
+  between "technically eligible" and a real **"best use of CMC Data & Signal"
+  contender (+$2k)** — and it matches the framing judges will read against.
+
+**My recommendation, flipped from last night:** seriously consider greenlighting
+the Agent Hub integration as the next build step. It's no longer just upside. The
+one thing to check first is whether the Agent Hub is on your **free tier** or
+needs a paid/x402 plan — I didn't burn a key probing it unattended.
+
+## 4. What's left for you (in priority order).
+
+1. **Decide the Agent Hub question** (section 3) — the live, now-higher-value
+   call. If yes, I'll scope it: confirm access tier, add an optional
+   CMC-signal-backed regime source behind the existing gate, keep Binance for the
+   backtest. If no, the clean skill ships as-is.
+2. **Review `STRATEGY-SPEC.md` and the `SKILL.md`** — they're judge-facing; your
+   eyes on the framing/claims would be good before submission.
+3. **Register / submit on DoraHacks** when you're ready (anytime before 21 Jun
+   12:00 UTC). The repo is local-only by design until you say push.
+
+Nothing irreversible was done; no remote push; no live trading. Everything is
+committed locally in atomic commits on `master`.
+
+---
+
+🛑 **Pausing (Stage 10).** Packaging done, spec written, mechanics confirmed, all
+green. The Agent Hub decision (now sharpened to "likely worth doing") and the
+DoraHacks submission are yours. Over to you, Markus.
