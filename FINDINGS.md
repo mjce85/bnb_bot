@@ -666,6 +666,13 @@ uncertain and regime-dependent.**
 
 ## 1. Bootstrap — is it one lucky path? (`reports/bootstrap_summary.md`)
 
+**In plain English:** we only lived through one history, so to check the result
+isn't a fluke of *this* timeline, we chop our day-by-day returns into short chunks
+and reshuffle them into **3,000 alternate plausible histories**, then re-run
+strategy-vs-hold in each. If the drawdown win holds across thousands of reshuffled
+worlds, it's a robust property — not luck. (One-line defense: *"we reshuffled our
+history 3,000 ways and beat buy-and-hold's drawdown in 96% of them."*)
+
 Paired stationary block bootstrap (21-day blocks, 3,000 resamples) of the 4-token
 portfolio's daily returns vs equal-weight hold — thousands of alternate histories,
 same resampled calendar applied to both.
