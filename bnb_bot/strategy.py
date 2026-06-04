@@ -29,6 +29,7 @@ import statistics
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 
+from bnb_bot.sentiment import FearGreedSeries
 from bnb_bot.types import Candle
 
 
@@ -300,3 +301,69 @@ class VolatilityTargeted(Strategy):
             else min(self._max_weight, self._target_vol / vol)
         )
         return max(0.0, min(1.0, base_w * scale))
+
+
+# --- Fear & Greed gate (composable) ------------------------------------
+
+
+class FearGreedGated(Strategy):
+    """Cut a base strategy's exposure when market sentiment is in extreme greed.
+
+    A top-level *risk overlay* powered by a Fear & Greed index. The hypothesis is
+    a-priori, not fitted: extreme greed marks froth / elevated top-risk, so when
+    the index sits at or above ``greed_threshold`` the overlay scales the base
+    weight down to ``greed_weight`` (0.0 = step fully to cash). The default
+    threshold of **75** is the standard "Extreme Greed" classification boundary,
+    chosen by convention rather than by maximizing a backtest — keeping with the
+    repo's anti-overfitting discipline.
+
+    No-lookahead is preserved by :meth:`FearGreedSeries.value_asof`, which only
+    returns sentiment stamped *strictly before* the decision bar. Before the
+    sentiment series begins (or if a reading is missing) the overlay is inert and
+    the base signal passes through unchanged — an honest "no view", not a guess.
+
+    This complements :class:`RegimeGated` (which handles sustained *downtrends*):
+    the regime gate steps aside in bear markets, the sentiment gate trims froth at
+    euphoric tops the trend filter hasn't yet rolled over on.
+    """
+
+    def __init__(
+        self,
+        base: Strategy,
+        fng: FearGreedSeries,
+        *,
+        greed_threshold: int = 75,
+        greed_weight: float = 0.0,
+    ):
+        if not 0 <= greed_threshold <= 100:
+            raise ValueError("greed_threshold must be in [0, 100]")
+        if not 0.0 <= greed_weight <= 1.0:
+            raise ValueError("greed_weight must be in [0, 1]")
+        self._base = base
+        self._fng = fng
+        self._greed_threshold = greed_threshold
+        self._greed_weight = greed_weight
+
+    @property
+    def name(self) -> str:
+        return f"{self._base.name}_fng{self._greed_threshold}"
+
+    @property
+    def params(self) -> dict:
+        return {
+            **self._base.params,
+            "fng_source": self._fng.source,
+            "greed_threshold": self._greed_threshold,
+            "greed_weight": self._greed_weight,
+        }
+
+    def signal(self, history: list[Candle]) -> float:
+        base_w = self._base.signal(history)
+        if base_w <= 0.0 or not history:
+            return base_w
+        value = self._fng.value_asof(history[-1].ts)
+        if value is None:
+            return base_w  # no sentiment reading yet — overlay inert
+        if value >= self._greed_threshold:
+            return max(0.0, min(1.0, base_w * self._greed_weight))
+        return base_w
