@@ -950,3 +950,115 @@ pitch rejects, and it probably overlaps machinery we already have. So:
 🛑 **Pausing (Stage 11).** CMC sentiment tested honestly, parked with reasons,
 and shipped as live context. Locked entry untouched. Open operator-gated calls
 unchanged (live execution layer; GitHub remote). Your move, Markus.
+
+---
+---
+
+# FINDINGS — Stage 12: A/B tournament — entry vs creative challengers (2026-06-04)
+
+Operator asked for a creative, out-of-the-box alternative strategy to A/B against
+the locked entry. Built three challengers (research-guided) and ran them on the
+**identical honest rig** — same costs, same risk overlay, same rebalance band, all
+parameters by convention (never searched on this data), no look-ahead.
+`reports/ab_challengers_summary.md`.
+
+**Bottom line: as a portfolio — what you'd actually run — our entry won outright,
+beating all three challengers on return, drawdown, AND Calmar. But the challengers
+exposed a real, specific gap: on individual strong-trending coins they capture far
+more upside than we do. The entry is validated; the gap is a logged lead.**
+
+## The contestants (why these)
+
+A background research agent surveyed strategy families with a skeptical eye. Picks:
+- **Donchian breakout (20/10)** — Turtle-style; *stays long the whole trend* (our
+  EMA+SMA exits early / re-enters late). The research's top pick to attack our
+  weak axis. Frozen 40-year-old conventional params.
+- **Time-series momentum (365d)** — long while the 12-month return is positive; the
+  least data-mined parameter in trend-following.
+- **Dual-momentum rotation (top-2 by 90d return, cash if none positive)** — the
+  cross-sectional concentration idea. (Research flagged cross-sectional momentum as
+  the most overfit/cost-fragile family — we ran it precisely to see.)
+
+Engine note: the portfolio loop was cleanly refactored to run on a portfolio-level
+*allocator*, so the per-symbol model and a cross-asset rotation share one tested
+loop (the single==portfolio equivalence test still passes). New: `bnb_bot/
+rotation.py`, `DonchianBreakout` + `TimeSeriesMomentum`; 125 tests.
+
+## 1. Portfolio — FULL window (the decision-relevant view). Entry wins.
+
+| Strategy | Return | MaxDD | Sharpe | Calmar |
+| --- | ---: | ---: | ---: | ---: |
+| **ENTRY (vol-tgt regime mom)** | **+85%** | **57%** | **0.50** | **0.22** |
+| donchian 20/10 | +57% | 64% | 0.42 | 0.14 |
+| tsmom 365d | +21% | 57% | 0.28 | 0.06 |
+| rotation (dual-mom) | **−63%** | 77% | −0.12 | −0.22 |
+| equal-weight hold | +8% | 80% | 0.37 | 0.02 |
+
+No challenger beat the entry — not on return, not on drawdown, not on Calmar. The
+flashy **cross-sectional rotation was the worst** (−63%), exactly the
+overfitting/cost-fragility the literature warns of (daily whipsaw + concentration
+into correlated names + the drawdown breaker locking it out). Glad we tested it
+rather than shipping it.
+
+## 2. Holdout tail (recent 25%, a down/choppy stretch). Entry is most defensive.
+
+| Strategy | Return | MaxDD |
+| --- | ---: | ---: |
+| **ENTRY** | −8% | **15%** |
+| donchian | −38% | 50% |
+| tsmom | −36% | 44% |
+| rotation | −14% | 46% |
+| hold | −2% | 55% |
+
+On recent unseen data the entry's drawdown (15%) is a third of every challenger's
+and less than hold's — the durable risk-control claim holds up.
+
+## 3. The honest catch: per token, the challengers DO capture more trend.
+
+| Token | ENTRY ret/DD (Calmar) | donchian | tsmom | hold |
+| --- | --- | --- | --- | --- |
+| BNB | +279%/23% (1.22) | **+1303%/41% (1.54)** | −2%/58% | +1781%/71% (1.02) |
+| BTC | +73%/37% (0.29) | +32%/57% | **+192%/28% (0.78)** | +151%/77% |
+| ETH | +77%/32% (0.35) | +24%/64% | +12%/49% | +175%/79% |
+| CAKE | **+34%/31% (0.18)** | −3%/82% | −85%/88% | −92%/98% |
+
+This is the operator's intuition vindicated: on a strong sustained trender,
+**Donchian captured +1303% on BNB vs our +279%** (Calmar 1.54 > our 1.22) by simply
+staying in the trend; **TSMOM beat everything on BTC** (+192%, Calmar 0.78). We
+*do* leave trend-upside on the table. But the same challengers **bleed on the weak
+asset** (Donchian/TSMOM deeply negative on CAKE, where our risk control kept us
++34%) — which is exactly why they lose at the *portfolio* level: their big
+single-name wins are cancelled by big single-name losses, while the entry's
+per-asset risk control and vol-targeting smooth the whole book.
+
+## 4. Verdict + the lead (not adopting now).
+
+- **The entry is validated by competition.** Three respected, conventionally-
+  parameterised strategies could not beat it as a portfolio, and it's the most
+  defensive on recent data. That's a stronger statement than "it looks good in
+  isolation."
+- **A genuine, non-overfit improvement thread exists:** the challengers win by
+  *letting winners run* (a slower, breakout-style exit) rather than our fast
+  EMA-cross exit that bails early. A trend-following *exit* on the entry might
+  recover some of the BNB/BTC upside without giving up the risk control. That is a
+  candidate for proper holdout/generalization validation — **logged, not bolted
+  on.** Curve-fitting a hybrid on this one in-sample view is the exact trap we
+  reject.
+- **Cross-sectional rotation is parked as a cautionary result**, consistent with
+  the literature.
+
+## 5. Caveats.
+
+- All challengers used the entry's risk overlay + rebalance band for a fair fight;
+  a rotation-tuned risk config might fare differently (not pursued — would be
+  tuning). TSMOM's 365-day warmup costs it ~year one of the window.
+- The holdout tail is read off the continuously-warmed run (recent-performance
+  slice), not a re-fit split — appropriate here since nothing was fitted.
+- Per-token challenger wins lean on strong single trends (BNB/BTC); they are not a
+  portfolio edge.
+
+---
+
+🛑 **Pausing (Stage 12).** A/B done; entry validated against real competition, and
+the one honest improvement lead (slower trend-following exit) is logged for
+deliberate validation, not curve-fit now. Locked entry unchanged. Your move, Markus.

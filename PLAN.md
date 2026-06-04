@@ -310,6 +310,24 @@ untouched throughout.
       BTC dominance + current stance, F&G framed as context). FINDINGS Stage 11;
       SKILL/README/SUBMISSION/AGENT-HUB-DECISION updated; 106 tests green.
 
+## Stage 12 — A/B tournament vs creative challengers (operator-approved 2026-06-04)
+
+Operator asked for an out-of-the-box challenger to A/B against the entry. Built
+three (research-guided), same honest rig, conventional params, no overfitting.
+
+- [x] **AB1 — Portfolio engine refactor.** DONE. `_portfolio_loop` runs on a
+      portfolio-level *allocator*; `run_portfolio_backtest` (per-symbol) and new
+      `run_rotation_backtest` (cross-asset) share it. Equivalence test still green.
+- [x] **AB2 — Challenger strategies.** DONE. `bnb_bot/rotation.py`
+      (`dual_momentum_allocator`), `DonchianBreakout` + `TimeSeriesMomentum` in
+      strategy.py. 19 new tests (test_rotation, test_challengers).
+- [x] **AB3 — Tournament + result.** DONE. `scripts/run_ab_challengers.py` +
+      `reports/ab_challengers_summary.md`. **Entry won the portfolio outright**
+      (return, drawdown, Calmar) vs Donchian / TSMOM / rotation; rotation worst
+      (−63%, as the literature warns). Per-token, challengers capture more trend
+      (Donchian BNB +1303% vs entry +279%; TSMOM BTC +192%) — a logged lead
+      (slower trend-following exit), not adopted. FINDINGS Stage 12. 125 tests.
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).
