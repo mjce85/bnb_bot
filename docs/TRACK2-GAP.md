@@ -68,14 +68,13 @@ Wallet Agent Kit, BNB AI Agent SDK) that stack.
    SKILL.md`; format captured (YAML frontmatter + workflow body + `references/`).
 2. ✅ **Package our entry as a CMC Skill.** DONE —
    `skills/risk-controlled-momentum/SKILL.md` + `skills/README.md` (install).
-3. ⚠️ **THE LIVE DECISION — the data / Agent Hub question.** Still open, and now
-   the highest-value open item (see the sharpened finding above). Keep Binance/
-   ccxt for *historical backtest* (CMC free tier lacks deep history) regardless;
-   the question is whether to *also consume CMC Agent Hub signals* on the
-   decision path — mapping our regime/momentum to CMC's pre-computed regime/risk
-   flags. This competes for the $2k "best use of CMC Data & Signal" prize and
-   matches CMC's own Track 2 framing. Operator call; needs a free-tier-vs-paid/
-   x402 check on Agent Hub access first.
+3. ✅ **THE DATA / AGENT HUB QUESTION — RESOLVED (Stage 11, 2026-06-04).** Wired
+   in CMC's **Fear & Greed** index (free Basic tier reaches it, incl. historical
+   for an honest backtest; Binance/ccxt stays for price history). Tested gating
+   the strategy on F&G — it didn't improve risk-adjusted performance — so F&G
+   ships as **live market context** (`scripts/live_context.py`), not a trade
+   trigger, with the negative finding reported. A genuine, verifiable use of CMC
+   sponsor data. Full account: FINDINGS Stage 11.
 4. ✅ **`STRATEGY-SPEC.md`.** DONE — formal self-contained spec at repo root.
 5. ✅ **Confirm submission mechanics.** DONE — DoraHacks, lock 21 Jun 12:00 UTC;
    prizes and rules captured above.

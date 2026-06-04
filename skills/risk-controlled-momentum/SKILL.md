@@ -121,8 +121,27 @@ that date range — the frozen preset is applied unchanged; no re-fitting.
 ### Step 5 — Confirm the engine's credibility
 
 ```bash
-./venv/bin/python -m pytest -q     # 89 tests pin no-lookahead, costs, risk, metrics
+./venv/bin/python -m pytest -q     # 106 tests pin no-lookahead, costs, risk, metrics
 ```
+
+### Step 6 — Today's stance + live CMC market context
+
+```bash
+./venv/bin/python scripts/live_context.py     # needs CMC_PRO_API_KEY in .env
+```
+
+Pulls **live** CoinMarketCap signals (Fear & Greed index + BTC dominance, free
+Basic tier) and shows the locked entry's *current* target weight per token. The
+sponsor-data touchpoint for the live demo — "here's the market context, here's
+what the strategy says to do right now". Read-only; moves no money.
+
+> **Honest note on Fear & Greed.** We backtested *gating* the strategy on CMC's
+> Fear & Greed (both directions, two data sources) and it did **not** improve
+> risk-adjusted performance — cutting in greed throws away bull-market upside, and
+> the small gain from cutting in fear overlaps the volatility-targeting we already
+> do. So F&G is shown as **market context, not a trade trigger**. See
+> `reports/fear_greed_summary.md`. This is the discipline the strategy is built
+> on: we don't ship a signal that doesn't prove out, even a sponsor's.
 
 ## Locked parameters
 

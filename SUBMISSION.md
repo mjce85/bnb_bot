@@ -40,11 +40,16 @@ A small, fully-tested Python engine (no framework magic):
   backtest lies — no look-ahead, costs on every fill, overfitting guarded at the
   experiment level.
 - **Composable strategies** — momentum / mean-reversion / trend-following, with
-  `RegimeGated` and `VolatilityTargeted` wrappers that stack cleanly.
+  `RegimeGated`, `VolatilityTargeted`, and `FearGreedGated` wrappers that stack
+  cleanly.
 - **Walk-forward evaluation + buy-and-hold benchmark** baked into every result.
 - **A bounded parameter search** with an untouched 25% holdout and one config
   chosen across all tokens — anti-overfitting by construction.
-- **89 tests** pinning the engine's honesty and the locked entry.
+- **106 tests** pinning the engine's honesty and the locked entry.
+- **Live CMC data, used honestly** — pulls CoinMarketCap's Fear & Greed + BTC
+  dominance for live context; we backtested *gating* on Fear & Greed and reported
+  that it doesn't improve risk-adjusted returns, so we use it as context, not a
+  trigger.
 
 ## Challenges we ran into
 
@@ -71,7 +76,7 @@ A small, fully-tested Python engine (no framework magic):
   buy-and-hold's drawdown on **18/18**, cutting drawdown ~half on average. See
   `docs/generalization.png`.
 - **A backtester we'd actually believe** — every honesty guard is enforced in
-  code and tested (89 tests).
+  code and tested (106 tests).
 
 ## What we learned
 

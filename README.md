@@ -151,8 +151,15 @@ market data") and satisfies the hackathon's sponsor-capability requirement.
   window after submission lock).
 
 Unlike CoinMarketCap's example skills (data-access references for the CMC API),
-this is a *strategy* skill. Consuming the CMC Agent Hub & Data API as a live
-signal source is a scoped follow-on, not yet wired in.
+this is a *strategy* skill.
+
+**Live CMC data.** `scripts/live_context.py` pulls live CoinMarketCap signals
+(Fear & Greed index + BTC dominance, free tier) and shows the strategy's current
+stance. We also *backtested* gating the strategy on CMC's Fear & Greed and found
+it does **not** improve risk-adjusted performance (`reports/fear_greed_summary.md`)
+— so we use F&G as honest **market context, not a trade trigger**. Testing a
+sponsor's signal and reporting that it didn't help is the same discipline the rest
+of the entry is built on.
 
 ## Reproduce it
 
@@ -188,7 +195,8 @@ bnb_bot/
   data.py         ccxt OHLCV loader + parquet cache + fail-loud gap detection
   backtest.py     event-driven engine: no-lookahead, costs on every fill
   strategy.py     Momentum, MeanReversion, TrendFollowing + RegimeGated /
-                  VolatilityTargeted composable wrappers
+                  VolatilityTargeted / FearGreedGated composable wrappers
+  sentiment.py    CMC + alternative.me Fear & Greed loader (no-lookahead lookup)
   risk.py         stop-loss, position/exposure caps, drawdown breaker
   metrics.py      return, drawdown, Sharpe, Sortino, Calmar, win rate, exposure
   walkforward.py  buy-and-hold benchmark + walk-forward evaluation
@@ -196,7 +204,7 @@ bnb_bot/
   report.py       markdown report + equity/drawdown plot
   presets.py      the frozen, validated submission entry
 scripts/          run_backtest · run_entry · run_portfolio · search_params · …
-tests/            89 tests pinning the engine, metrics, risk, and strategies
+tests/            106 tests pinning the engine, metrics, risk, and strategies
 skills/           the CMC Skill packaging (risk-controlled-momentum/SKILL.md)
 STRATEGY-SPEC.md  the formal, self-contained backtestable spec
 ```

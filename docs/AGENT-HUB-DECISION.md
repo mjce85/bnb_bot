@@ -1,5 +1,16 @@
 # CMC Agent Hub — research + advisory (for the 2026-06-04 evening dig)
 
+> **RESOLVED 2026-06-04 (Stage 11).** Decision made and built: wired in CMC's
+> **Fear & Greed** index (free Basic tier, incl. historical for an honest
+> backtest). We *tested* gating the strategy on F&G — it did **not** improve
+> risk-adjusted performance (greed-cut throws away upside; the small fear-cut gain
+> overlaps existing vol-targeting and the proposed alt-lag mechanism doesn't hold
+> at daily resolution). So F&G ships as **live market context, not a trade
+> trigger** (`scripts/live_context.py`); the locked entry is unchanged. Full
+> account: FINDINGS.md Stage 11. The advisory below is preserved as written.
+
+---
+
 Markus asked me to research whether/how to wire the **CoinMarketCap Agent Hub**
 into our Track 2 entry, so he can decide in the morning. Here's everything, ending
 with a recommendation.

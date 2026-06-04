@@ -857,3 +857,96 @@ committed locally in atomic commits on `master`.
 🛑 **Pausing (Stage 10).** Packaging done, spec written, mechanics confirmed, all
 green. The Agent Hub decision (now sharpened to "likely worth doing") and the
 DoraHacks submission are yours. Over to you, Markus.
+
+---
+---
+
+# FINDINGS — Stage 11: CMC Fear & Greed — tested, parked, used as live context (2026-06-04)
+
+After packaging (Stage 10), the open question was whether to wire in the CMC
+Agent Hub. We tested whether CMC's **Fear & Greed** index improves the strategy.
+**It doesn't — and we now know why. We use it as honest live context, not a
+trade trigger.** This is a clean negative result, recorded straight.
+
+## 1. Access: the free tier is enough (no paid plan, no wallet).
+
+The operator's free CMC Basic key (15k credits/mo) reaches: **live quotes**,
+**global metrics** (BTC dominance), **Fear & Greed latest**, and — the find that
+unlocked an honest backtest — **Fear & Greed *historical*** (`/v3/fear-and-greed/
+historical`, back to **2023-06-29**). Paid-only (403): all OHLCV/price history and
+the technical-analysis endpoints. So history for the price backtest still comes
+from Binance/ccxt; CMC supplies sentiment. No x402/wallet needed.
+
+## 2. We could backtest it honestly (two sources, cross-checked).
+
+- **CMC F&G**: 2023-06 → now (the sponsor's own index — what we deploy live).
+- **alternative.me F&G**: 2018 → now (free, covers our full 2021-start window).
+- They **correlate 0.894** over 1070 overlapping days, so alternative.me is a
+  sound proxy to extend the backtest before CMC's index begins — stated openly,
+  not assumed. `reports/fear_greed_summary.md`.
+
+`bnb_bot/sentiment.py` loads both (no-lookahead `value_asof` — strictly pre-bar);
+`FearGreedGated` is a composable overlay; 20 sentiment tests.
+
+## 3. The result: gating on F&G does NOT improve the strategy.
+
+Primary, a-priori rule (step to cash in **extreme greed ≥75**, the standard
+boundary — not tuned). Portfolio, full window:
+
+| Variant | Return | MaxDD | Calmar |
+| --- | ---: | ---: | ---: |
+| no gate (locked entry) | +85% | 57% | 0.22 |
+| cut in greed ≥75 | −3% | 31% | −0.02 |
+
+It cuts drawdown but destroys return (Calmar falls everywhere, every token). CMC
+and alternative.me **agree** on the verdict. Reason: crypto bull markets *are*
+greedy, so cutting at greed exits the strongest rallies.
+
+## 4. The operator's inverse hypothesis — tested, and it's instructive.
+
+The operator asked (for info, not to force it): if greed-cut hurts, does the
+**inverse** help, and might a BTC-led F&G add value to *lagging* alts? Tested both.
+
+**Inverse (cut in extreme fear ≤25)** modestly improves everything — portfolio
+return +85%→+105%, drawdown 57%→45%, Calmar 0.22→0.32; small same-direction gains
+on all four tokens. `reports/fear_greed_variants_summary.md`.
+
+**But the mechanism the operator proposed doesn't hold** (`analyze_leadlag.py`):
+- F&G *is* BTC-led (corr with ΔF&G: BTC 0.65 > ETH 0.54 > BNB 0.42, CAKE 0.44). ✅
+- Alts do **not** lag BTC at daily resolution: same-day return correlation 0.63–
+  0.82, ≈0 at every ±day lag. The intraday lag washes out by daily bars. ❌
+- F&G is a *lagging echo* of price (its change correlates with the *prior* day's
+  return), so it leads no one.
+
+So the inverse's small gain isn't a lead-lag edge — it's **volatility-regime
+avoidance** (extreme-fear days cluster with crashes), which our **volatility-
+targeting layer already does**. Likely redundant, and found by looking at the
+data after the fact (selection bias) with gains within noise per token.
+
+## 5. Decision: note it and park it; F&G is live context only.
+
+Adopting the fear-cut on one in-sample run would be the exact overfitting our
+pitch rejects, and it probably overlaps machinery we already have. So:
+
+- The **locked entry is unchanged.** No new parameters, no re-fit.
+- CMC F&G ships as **live market context**: `scripts/live_context.py` shows
+  today's F&G + BTC dominance alongside the entry's current stance, with F&G
+  explicitly framed as informational. (E.g. 2026-06-04: F&G 19 "Extreme Fear",
+  strategy flat/cash on all four — the context corroborates the defensive stance.)
+- The negative finding is reported, not buried — honest quant research, and a
+  genuine, verifiable use of CMC's sponsor data.
+
+## 6. Caveats (same honesty bar).
+
+- The inverse fear-cut *might* survive full holdout/generalization/bootstrap
+  validation — we did not run that (operator chose to park it). It's a logged
+  lead, not a dismissed one.
+- F&G thresholds (75/25) are standard classification boundaries, not searched.
+- alternative.me ≠ CMC's index (0.894 correlated); the pre-2023 backtest leans on
+  the proxy, disclosed.
+
+---
+
+🛑 **Pausing (Stage 11).** CMC sentiment tested honestly, parked with reasons,
+and shipped as live context. Locked entry untouched. Open operator-gated calls
+unchanged (live execution layer; GitHub remote). Your move, Markus.

@@ -285,6 +285,31 @@ through the open packaging tasks from `docs/TRACK2-GAP.md`.
 source (competes for "best use of CMC Data & Signal" $2k + matches the Track 2
 framing) vs. ship the clean skill as-is. See FINDINGS Stage 10.
 
+## Stage 11 — CMC Fear & Greed: test, park, ship as live context (operator-approved 2026-06-04)
+
+Operator chose to wire in the CMC Agent Hub via the Fear & Greed index, test it
+honestly, and (after the result) use it as live context only. Locked entry
+untouched throughout.
+
+- [x] **FG1 — Verify free-tier access.** DONE. `scripts/probe_cmc.py`: free Basic
+      key reaches live quotes, global metrics, F&G latest, **and F&G historical**
+      (back to 2023-06-29). OHLCV/TA endpoints are paid (403) → Binance/ccxt stays
+      for price history. No paid plan / x402 needed.
+- [x] **FG2 — F&G loader + overlay.** DONE. `bnb_bot/sentiment.py` (CMC +
+      alternative.me, no-lookahead `value_asof`, fail-loud on missing key) +
+      `FearGreedGated` (both greed and fear sides). 20 tests.
+- [x] **FG3 — Honest backtest.** DONE. `scripts/run_fear_greed.py`: gate on/off,
+      both sources, per token + portfolio; CMC vs alt.me correlate 0.894. Result:
+      greed-cut hurts (Calmar falls everywhere). `reports/fear_greed_summary.md`.
+- [x] **FG4 — Operator's inverse + mechanism check.** DONE.
+      `scripts/explore_fng_variants.py` (fear-cut modestly helps) +
+      `scripts/analyze_leadlag.py` (F&G is BTC-led ✅ but alts don't lag BTC daily
+      ❌ → gain is vol-regime avoidance, overlaps vol-targeting). Parked, not
+      adopted (avoids overfitting). `reports/fear_greed_variants_summary.md`.
+- [x] **FG5 — Live context + docs.** DONE. `scripts/live_context.py` (live F&G +
+      BTC dominance + current stance, F&G framed as context). FINDINGS Stage 11;
+      SKILL/README/SUBMISSION/AGENT-HUB-DECISION updated; 106 tests green.
+
 ## Out of scope this milestone
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).
