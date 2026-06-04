@@ -75,27 +75,50 @@ number.
 
 ## Headline results
 
-Daily bars, 2021 … 2026, four tokens (BNB, CAKE, ETH, BTC). Every fill pays
-costs; signals are causal.
+Every fill pays costs; signals are causal; nothing here is in-sample-only. Two
+honest views — the **broadest, longest-history test first**, then the **validated
+entry on the exact set it was locked on**.
+
+### Broadest test — frozen entry, 18 tokens, full history to 2017
+
+The strongest overfitting check: the *frozen* entry (14 of these 18 tokens were
+**never** used to choose its parameters), each run over its **full Binance history
+back to 2017** — including the brutal 2018 bear the 2021-start window never saw. It
+beat buy-and-hold's **drawdown on 18/18**, cutting max drawdown roughly in **half
+on average**, and beat hold's **return on 9 of the 18** — the coins that pumped
+then collapsed (FIL +79% vs −99%, ADA +429% vs −3%, EOS −3% vs −94%) — while
+trailing on the nine that mostly went up. On the mega-survivors (BTC/ETH/BNB)
+holding still out-returns us — nothing long-only-spot beats a coin that only went
+up — but it does so at **2–3× our drawdown**. The durable, universal win is
+drawdown; the return win is real but asset-dependent.
+
+![drawdown across 18 tokens](docs/generalization.png)
+
+Detail in [`reports/generalization_summary.md`](reports/generalization_summary.md);
+per-asset equity curves in [`docs/performance_all.png`](docs/performance_all.png).
+
+### The validated entry — 4 design tokens, common window 2021 → 2026
+
+This is the universe and window the entry was **searched and locked on**. The
+window starts in 2021 for a mechanical reason — **CAKE only listed on Binance in
+Feb 2021**, and a four-token portfolio needs all four trading at once (BTC/ETH/BNB
+go back to 2017, used in the broader test above). Drawdown and risk-adjusted
+**Calmar** are the story:
 
 ![strategy vs buy & hold — equity and drawdown](docs/headline.png)
 
-*Blue = strategy, grey = buy & hold. The right column is the story: our drawdowns
-are a fraction of holding's, on every token.*
+| Token | Strategy return | B&H return | Strategy maxDD | B&H maxDD | Strategy Calmar | B&H Calmar |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| BNB | +279% | +1781% | **23%** | 71% | **1.22** | 1.02 |
+| BTC | +73% | +151% | **37%** | 77% | **0.29** | 0.24 |
+| ETH | +77% | +175% | **32%** | 79% | **0.35** | 0.26 |
+| CAKE | +34% | −92% | **31%** | 98% | **0.18** | −0.40 |
 
-**Full window — strategy vs buy & hold (max drawdown is the story):**
-
-| Token | Strategy return | B&H return | Strategy maxDD | B&H maxDD |
-| --- | ---: | ---: | ---: | ---: |
-| BNB | +279% | +1781% | **23%** | 71% |
-| BTC | +73% | +151% | **37%** | 77% |
-| ETH | +77% | +175% | **32%** | 79% |
-| CAKE | **+34%** | −92% | **31%** | 98% |
-
-Drawdown is roughly **one-third to one-half** of buy-and-hold across the board,
-and the strategy stays *positive even in CAKE, which lost 92% over the period.*
-BNB's Calmar (return per unit drawdown) is **1.22 vs holding's 1.02** — more
-return per unit of risk than just holding the best performer.
+Drawdown is a **third to a half** of buy-and-hold, and the strategy beats hold's
+**Calmar — return per unit of drawdown — on all four tokens**: more reward per unit
+of risk than holding, even where holding's *raw* return is higher. In a roaring
+bull, long-only spot can't out-return holding the winners; we trade that for far
+less pain (and a *positive* return even on CAKE, which holders rode down −92%).
 
 **Untouched holdout (most recent 25%, scored once) — the honesty test:**
 
@@ -104,18 +127,6 @@ The strategy beat buy-and-hold's **drawdown on 4/4 tokens** and its **return on
 **Sharpe of 1.26 vs 0.29**; on ETH **+39% vs −38%** (Sharpe 1.02 vs −0.13). Full
 detail in
 [`reports/search_cost_robust_summary.md`](reports/search_cost_robust_summary.md).
-
-**Generalization (the strongest overfitting check):** the *frozen* entry, run on
-**18 liquid tokens** (14 never used to choose its parameters), each over its full
-Binance history back to 2017 — including the brutal 2018 bear our 2021-start tests
-never saw — beat buy-and-hold's drawdown on **18/18**, cutting max drawdown
-roughly in **half on average**. It made money in many coins that holders watched
-collapse (FIL +79% vs −99%, ADA +429% vs −3%, EOS −3% vs −94%).
-
-![drawdown across 18 tokens](docs/generalization.png)
-
-Detail in [`reports/generalization_summary.md`](reports/generalization_summary.md);
-per-asset equity curves in [`docs/performance_all.png`](docs/performance_all.png).
 
 **Pressure tests (does it survive scrutiny?):** a paired block **bootstrap** of
 3,000 resampled histories found the strategy beat hold's drawdown in **95.6%** of
