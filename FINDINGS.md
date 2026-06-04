@@ -1062,3 +1062,57 @@ per-asset risk control and vol-targeting smooth the whole book.
 🛑 **Pausing (Stage 12).** A/B done; entry validated against real competition, and
 the one honest improvement lead (slower trend-following exit) is logged for
 deliberate validation, not curve-fit now. Locked entry unchanged. Your move, Markus.
+
+---
+---
+
+# FINDINGS — Stage 13: validating the "let winners run" lead — it's a wash (2026-06-04)
+
+The A/B tournament (Stage 12) suggested the entry exits trends early and leaves
+upside on the table. We chased that ONE lead the disciplined way:
+`scripts/validate_slow_exit.py`. **Verdict: no meaningful improvement — adopt
+nothing. The entry stands, validated again.**
+
+## The test (no new parameters)
+
+Swap only the *exit*: replace the entry's symmetric `RegimeGated` (which exits when
+the fast EMA flips) with `StickyExit` — same EMA-12/26 base, same 50-day SMA, same
+vol target/lookback — so it *holds until the 50-day trend actually breaks*. Nothing
+new to tune. Held to the entry's own evidence bar: 18-token generalization (full
+history) + the 4-token portfolio (full + recent holdout).
+
+## Result: indistinguishable from the entry
+
+- **18 tokens:** slow-exit beat the entry's return on just **8/18** (a coin flip);
+  average return 272.8% → 279.3% (+6.5pp, noise); average maxDD 41.7% → 41.6%
+  (unchanged); drawdown beaten vs hold **18/18 for both**.
+- **Portfolio:** full window **+84.5% vs +84.6%**, drawdown 56.9% both, Calmar 0.22
+  both; holdout tail identical (−7.8%, 15% DD).
+
+It wins on some trenders (BNB +1100%→+1236%, DOGE, XLM, ETC, BCH), loses on others
+(BTC, ADA, EOS), and nets to a wash.
+
+## Why the promising lead evaporated
+
+On daily bars the two exits largely **coincide**: when the fast EMA crosses down,
+price is usually already at/below the 50-day SMA, so "exit on EMA flip" and "exit on
+trend break" fire at nearly the same time. The big per-token upside in Stage 12 came
+from **Donchian's fundamentally different structure** (a much wider channel, no
+regime gate, no vol-targeting) — a more aggressive, riskier design that *loses at
+the portfolio level* — not from the exit-timing asymmetry alone. Constrained to our
+own conventional 50-SMA, "letting winners run" simply doesn't change the exits much.
+
+## Takeaway
+
+This is the discipline paying off: a plausible, evidence-suggested improvement,
+tested honestly with no new parameters, turned out to be a wash — so we **don't**
+bolt it on. Chasing the flattering per-token cases (adopt it "because BNB") would
+have been overfitting by the back door. The locked entry is unchanged and now has
+one more failed-challenger notch confirming it. `StickyExit` stays in the codebase
+as a tested, documented building block; it is not part of the shipped entry.
+
+---
+
+🛑 **Pausing (Stage 13).** The one real lead from the A/B was validated and closed
+as a wash; entry frozen, no overfitting. Strategy exploration is now genuinely
+done — next is submission polish, not more backtests. Your move, Markus.

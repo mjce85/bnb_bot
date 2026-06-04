@@ -7,10 +7,31 @@ import pytest
 from bnb_bot.strategy import (
     DonchianBreakout,
     DonchianParams,
+    StickyExit,
+    Strategy,
     TimeSeriesMomentum,
     TimeSeriesMomentumParams,
 )
 from bnb_bot.types import Candle
+
+
+class _Flip(Strategy):
+    """Base stub whose signal can be flipped between calls, to test StickyExit."""
+
+    def __init__(self, w=1.0):
+        self.w = w
+
+    @property
+    def name(self):
+        return "flip"
+
+    @property
+    def params(self):
+        return {}
+
+    def signal(self, history):
+        return self.w
+
 
 _DAY = 24 * 60 * 60 * 1000
 
@@ -94,3 +115,44 @@ def test_tsmom_flat_when_trailing_return_negative():
 def test_tsmom_validates_params():
     with pytest.raises(ValueError):
         TimeSeriesMomentumParams(lookback=1)
+
+
+# --- StickyExit (let-winners-run) --------------------------------------
+
+_UP = _flat([10, 10, 10, 20])  # last 20 > SMA(10,10,20)=13.3 -> regime up
+_DOWN = _flat([20, 20, 20, 5])  # last 5 < SMA(20,20,5)=15 -> regime down
+
+
+def test_sticky_warmup_is_flat():
+    s = StickyExit(_Flip(1.0), trend_period=3)
+    assert s.signal(_flat([10, 10])) == 0.0
+
+
+def test_sticky_enters_on_base_plus_uptrend():
+    s = StickyExit(_Flip(1.0), trend_period=3)
+    assert s.signal(_UP) == 1.0
+
+
+def test_sticky_does_not_enter_when_base_flat():
+    s = StickyExit(_Flip(0.0), trend_period=3)
+    assert s.signal(_UP) == 0.0  # uptrend but base says no
+
+
+def test_sticky_holds_through_base_flip_while_trend_holds():
+    base = _Flip(1.0)
+    s = StickyExit(base, trend_period=3)
+    assert s.signal(_UP) == 1.0  # entered
+    base.w = 0.0  # base flips flat (a shallow-pullback EMA cross would exit here)
+    assert s.signal(_UP) == 1.0  # but StickyExit holds — trend still up
+
+
+def test_sticky_exits_only_when_trend_breaks():
+    base = _Flip(1.0)
+    s = StickyExit(base, trend_period=3)
+    assert s.signal(_UP) == 1.0  # long
+    assert s.signal(_DOWN) == 0.0  # trend broke -> exit
+
+
+def test_sticky_validates_params():
+    with pytest.raises(ValueError):
+        StickyExit(_Flip(), trend_period=1)

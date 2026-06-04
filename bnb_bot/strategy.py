@@ -494,3 +494,52 @@ class TimeSeriesMomentum(Strategy):
         if past <= 0:
             return 0.0
         return 1.0 if (history[-1].close / past - 1.0) > 0.0 else 0.0
+
+
+# --- Sticky (let-winners-run) exit (composable) ------------------------
+
+
+class StickyExit(Strategy):
+    """Enter on base + uptrend, then HOLD until the trend itself breaks.
+
+    The asymmetric counterpart to :class:`RegimeGated`. The ``trend_period`` SMA
+    gates the *entry* (go long only when the base signals long AND price is above
+    its trend SMA), but once long the position is held until price falls back
+    *below* the SMA — it does **not** exit merely because the faster base signal
+    flips. The point: let a winner run for the whole duration of a trend instead of
+    bailing on a shallow pullback (the A/B tournament showed the entry leaves
+    bull-market upside on the table by exiting early).
+
+    Stateful (one long/flat stance updated only from past bars, like
+    :class:`MeanReversion`), so an instance backs exactly one run. No-lookahead:
+    the stance at bar ``t`` uses only ``history``.
+    """
+
+    def __init__(self, base: Strategy, trend_period: int = 50):
+        if trend_period < 2:
+            raise ValueError("trend_period must be >= 2")
+        self._base = base
+        self._trend_period = trend_period
+        self._long = False
+
+    @property
+    def name(self) -> str:
+        return f"{self._base.name}_sticky{self._trend_period}"
+
+    @property
+    def params(self) -> dict:
+        return {**self._base.params, "sticky_trend_period": self._trend_period}
+
+    def signal(self, history: list[Candle]) -> float:
+        closes = [c.close for c in history]
+        if len(closes) < self._trend_period:
+            return 0.0  # warmup — no trend reference
+        sma = statistics.mean(closes[-self._trend_period :])
+        regime_up = closes[-1] > sma
+        if self._long:
+            if not regime_up:  # exit only when the trend breaks
+                self._long = False
+        else:
+            if regime_up and self._base.signal(history) > 0:  # asymmetric entry
+                self._long = True
+        return 1.0 if self._long else 0.0
