@@ -121,7 +121,7 @@ that date range — the frozen preset is applied unchanged; no re-fitting.
 ### Step 5 — Confirm the engine's credibility
 
 ```bash
-./venv/bin/python -m pytest -q     # 106 tests pin no-lookahead, costs, risk, metrics
+./venv/bin/python -m pytest -q     # 131 tests pin no-lookahead, costs, risk, metrics
 ```
 
 ### Step 6 — Today's stance + live CMC market context

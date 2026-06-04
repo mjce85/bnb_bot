@@ -45,7 +45,7 @@ A small, fully-tested Python engine (no framework magic):
 - **Walk-forward evaluation + buy-and-hold benchmark** baked into every result.
 - **A bounded parameter search** with an untouched 25% holdout and one config
   chosen across all tokens — anti-overfitting by construction.
-- **106 tests** pinning the engine's honesty and the locked entry.
+- **131 tests** pinning the engine's honesty and the locked entry.
 - **Live CMC data, used honestly** — pulls CoinMarketCap's Fear & Greed + BTC
   dominance for live context; we backtested *gating* on Fear & Greed and reported
   that it doesn't improve risk-adjusted returns, so we use it as context, not a
@@ -75,8 +75,13 @@ A small, fully-tested Python engine (no framework magic):
   their full history back to 2017 (including the 2018 bear), it beat
   buy-and-hold's drawdown on **18/18**, cutting drawdown ~half on average. See
   `docs/generalization.png`.
+- **It beat its competition in a fair bake-off** — run against three respected
+  challengers (Donchian breakout, time-series momentum, dual-momentum rotation) on
+  the identical rig, the entry won the portfolio outright on return, drawdown, and
+  Calmar; the flashy rotation collapsed (−63%). We even validated the one
+  improvement the bake-off hinted at and it was a wash — so we changed nothing.
 - **A backtester we'd actually believe** — every honesty guard is enforced in
-  code and tested (106 tests).
+  code and tested (131 tests).
 
 ## What we learned
 
@@ -101,7 +106,7 @@ We still lead with the risk story, not the return.
 ```bash
 python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python scripts/run_entry.py        # headline result
-./venv/bin/python -m pytest -q                # 89 honesty/correctness tests
+./venv/bin/python -m pytest -q                # 131 honesty/correctness tests
 ```
 
 See [`README.md`](README.md) for detail, [`FINDINGS.md`](FINDINGS.md) for the

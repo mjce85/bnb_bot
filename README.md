@@ -15,6 +15,14 @@ fraction of buy-and-hold while staying profitable.
 This milestone is **backtest + report only**. No live trading, no orders, no
 keys, no capital at risk.
 
+> **Why that matters for judging.** Track 2 re-runs every submission on a
+> **held-out market window after the deadline**. Strategies tuned to look good
+> in-sample collapse the moment they meet unseen data — that's the trap. This
+> entry is engineered for exactly that test: every number below is out-of-sample,
+> cross-validated, or stress-tested, and the parameters were frozen by a
+> holdout-validated search, never hand-picked. It's built to *survive the re-run*,
+> not to win a screenshot.
+
 ---
 
 ## Why this entry
@@ -136,6 +144,27 @@ down to harden it — see `FINDINGS.md` Stage 7.) Detail in
 [`reports/portfolio_summary.md`](reports/portfolio_summary.md) and
 [`reports/robustness_summary.md`](reports/robustness_summary.md).
 
+## Tested against competition (A/B)
+
+We didn't just polish our own entry — we ran it against three respected
+challengers on the **identical honest rig** (same costs, risk, no look-ahead,
+parameters by convention): a **Donchian breakout**, **time-series momentum**, and
+a **dual-momentum rotation**. Traded as a portfolio, **the entry won outright** —
+best return, drawdown, *and* Calmar; the flashy rotation blew up (−63%, exactly the
+overfitting/cost-fragility the literature warns of). On the recent holdout its
+drawdown was a third of every challenger's.
+
+![A/B tournament — entry vs challengers](docs/ab_challengers.png)
+
+Per *individual* token the challengers can capture more of a single strong trend
+(a breakout rode BNB further), but they bleed on the weak assets — which is why
+they lose at the portfolio level, where our per-asset risk control smooths the
+book. We even chased the one improvement the A/B suggested (a slower
+"let-winners-run" exit) through the full validation gauntlet — it came out a
+**wash**, so we adopted nothing and left the entry frozen. Detail:
+[`reports/ab_challengers_summary.md`](reports/ab_challengers_summary.md),
+[`FINDINGS.md`](FINDINGS.md) Stages 12–13.
+
 ## Packaged as a CMC Skill
 
 The strategy ships as a **CMC Skill** — the lightweight, folder-based format from
@@ -194,17 +223,19 @@ bnb_bot/
   types.py        core dataclasses (Candle, Signal, Fill, Position, ...)
   data.py         ccxt OHLCV loader + parquet cache + fail-loud gap detection
   backtest.py     event-driven engine: no-lookahead, costs on every fill
-  strategy.py     Momentum, MeanReversion, TrendFollowing + RegimeGated /
-                  VolatilityTargeted / FearGreedGated composable wrappers
+  strategy.py     Momentum, MeanReversion, TrendFollowing, DonchianBreakout,
+                  TimeSeriesMomentum + RegimeGated / VolatilityTargeted /
+                  FearGreedGated / StickyExit composable wrappers
+  rotation.py     cross-asset allocators (dual-momentum rotation challenger)
   sentiment.py    CMC + alternative.me Fear & Greed loader (no-lookahead lookup)
   risk.py         stop-loss, position/exposure caps, drawdown breaker
   metrics.py      return, drawdown, Sharpe, Sortino, Calmar, win rate, exposure
   walkforward.py  buy-and-hold benchmark + walk-forward evaluation
-  portfolio.py    multi-asset portfolio engine (shared book, exposure caps)
+  portfolio.py    shared-book engine: per-symbol + cross-asset rotation allocators
   report.py       markdown report + equity/drawdown plot
   presets.py      the frozen, validated submission entry
-scripts/          run_backtest · run_entry · run_portfolio · search_params · …
-tests/            106 tests pinning the engine, metrics, risk, and strategies
+scripts/          run_entry · run_portfolio · run_ab_challengers · live_context · …
+tests/            131 tests pinning the engine, metrics, risk, and strategies
 skills/           the CMC Skill packaging (risk-controlled-momentum/SKILL.md)
 STRATEGY-SPEC.md  the formal, self-contained backtestable spec
 ```
