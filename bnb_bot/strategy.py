@@ -307,24 +307,31 @@ class VolatilityTargeted(Strategy):
 
 
 class FearGreedGated(Strategy):
-    """Cut a base strategy's exposure when market sentiment is in extreme greed.
+    """Cut a base strategy's exposure at sentiment extremes (greed and/or fear).
 
-    A top-level *risk overlay* powered by a Fear & Greed index. The hypothesis is
-    a-priori, not fitted: extreme greed marks froth / elevated top-risk, so when
-    the index sits at or above ``greed_threshold`` the overlay scales the base
-    weight down to ``greed_weight`` (0.0 = step fully to cash). The default
-    threshold of **75** is the standard "Extreme Greed" classification boundary,
-    chosen by convention rather than by maximizing a backtest — keeping with the
-    repo's anti-overfitting discipline.
+    A top-level *risk overlay* powered by a Fear & Greed index. Each side is
+    optional and a-priori, not fitted:
+
+    * **greed side** — when the index sits at or above ``greed_threshold``, scale
+      the base weight to ``greed_weight`` (0.0 = step to cash). The hypothesis:
+      extreme greed marks froth / elevated top-risk. Default **75** is the
+      standard "Extreme Greed" classification boundary, chosen by convention.
+    * **fear side** — when the index sits at or below ``fear_threshold``, scale to
+      ``fear_weight``. The inverse hypothesis: extreme fear marks capitulation /
+      falling-knife risk. Off by default; **25** is the standard "Extreme Fear"
+      boundary.
+
+    Pass ``None`` to disable a side. With both active the overlay only holds in the
+    calm middle band. Thresholds are convention boundaries, not search winners —
+    keeping with the repo's anti-overfitting discipline.
 
     No-lookahead is preserved by :meth:`FearGreedSeries.value_asof`, which only
     returns sentiment stamped *strictly before* the decision bar. Before the
-    sentiment series begins (or if a reading is missing) the overlay is inert and
-    the base signal passes through unchanged — an honest "no view", not a guess.
+    series begins (or a reading is missing) the overlay is inert and the base
+    passes through — an honest "no view", not a guess. The overlay only ever
+    *reduces* exposure; it cannot lift a flat base.
 
-    This complements :class:`RegimeGated` (which handles sustained *downtrends*):
-    the regime gate steps aside in bear markets, the sentiment gate trims froth at
-    euphoric tops the trend filter hasn't yet rolled over on.
+    Complements :class:`RegimeGated` (which handles sustained *downtrends*).
     """
 
     def __init__(
@@ -332,21 +339,37 @@ class FearGreedGated(Strategy):
         base: Strategy,
         fng: FearGreedSeries,
         *,
-        greed_threshold: int = 75,
+        greed_threshold: int | None = 75,
         greed_weight: float = 0.0,
+        fear_threshold: int | None = None,
+        fear_weight: float = 0.0,
     ):
-        if not 0 <= greed_threshold <= 100:
-            raise ValueError("greed_threshold must be in [0, 100]")
-        if not 0.0 <= greed_weight <= 1.0:
-            raise ValueError("greed_weight must be in [0, 1]")
+        for name, t in (
+            ("greed_threshold", greed_threshold),
+            ("fear_threshold", fear_threshold),
+        ):
+            if t is not None and not 0 <= t <= 100:
+                raise ValueError(f"{name} must be in [0, 100] or None")
+        for name, w in (("greed_weight", greed_weight), ("fear_weight", fear_weight)):
+            if not 0.0 <= w <= 1.0:
+                raise ValueError(f"{name} must be in [0, 1]")
+        if greed_threshold is None and fear_threshold is None:
+            raise ValueError("at least one of greed_threshold / fear_threshold")
         self._base = base
         self._fng = fng
         self._greed_threshold = greed_threshold
         self._greed_weight = greed_weight
+        self._fear_threshold = fear_threshold
+        self._fear_weight = fear_weight
 
     @property
     def name(self) -> str:
-        return f"{self._base.name}_fng{self._greed_threshold}"
+        tag = ""
+        if self._greed_threshold is not None:
+            tag += f"g{self._greed_threshold}"
+        if self._fear_threshold is not None:
+            tag += f"f{self._fear_threshold}"
+        return f"{self._base.name}_fng{tag}"
 
     @property
     def params(self) -> dict:
@@ -355,6 +378,8 @@ class FearGreedGated(Strategy):
             "fng_source": self._fng.source,
             "greed_threshold": self._greed_threshold,
             "greed_weight": self._greed_weight,
+            "fear_threshold": self._fear_threshold,
+            "fear_weight": self._fear_weight,
         }
 
     def signal(self, history: list[Candle]) -> float:
@@ -364,6 +389,8 @@ class FearGreedGated(Strategy):
         value = self._fng.value_asof(history[-1].ts)
         if value is None:
             return base_w  # no sentiment reading yet — overlay inert
-        if value >= self._greed_threshold:
+        if self._greed_threshold is not None and value >= self._greed_threshold:
             return max(0.0, min(1.0, base_w * self._greed_weight))
+        if self._fear_threshold is not None and value <= self._fear_threshold:
+            return max(0.0, min(1.0, base_w * self._fear_weight))
         return base_w

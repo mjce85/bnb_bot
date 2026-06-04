@@ -167,3 +167,35 @@ def test_gate_validates_params():
         FearGreedGated(_Const(1.0), s, greed_threshold=150)
     with pytest.raises(ValueError):
         FearGreedGated(_Const(1.0), s, greed_weight=2.0)
+    with pytest.raises(ValueError):  # both sides disabled is meaningless
+        FearGreedGated(_Const(1.0), s, greed_threshold=None, fear_threshold=None)
+
+
+def test_fear_side_cuts_in_extreme_fear():
+    s = _series([10, 10], start=0)  # extreme fear
+    # greed side off, fear side on (cut at <=25)
+    gated = FearGreedGated(
+        _Const(1.0), s, greed_threshold=None, fear_threshold=25, fear_weight=0.0
+    )
+    assert gated.signal([_candle(1)]) == 0.0
+
+
+def test_fear_side_passthrough_when_not_fearful():
+    s = _series([60, 60], start=0)  # greed-ish, not fear
+    gated = FearGreedGated(
+        _Const(0.7), s, greed_threshold=None, fear_threshold=25, fear_weight=0.0
+    )
+    assert gated.signal([_candle(1)]) == pytest.approx(0.7)
+
+
+def test_both_extremes_hold_only_in_middle():
+    # cut at greed>=75 AND fear<=25 -> hold only in [26,74]
+    mid = _series([50, 50], start=0)
+    greed = _series([80, 80], start=0)
+    fear = _series([10, 10], start=0)
+    kw = dict(greed_threshold=75, fear_threshold=25)
+    assert FearGreedGated(_Const(1.0), mid, **kw).signal([_candle(1)]) == pytest.approx(
+        1.0
+    )
+    assert FearGreedGated(_Const(1.0), greed, **kw).signal([_candle(1)]) == 0.0
+    assert FearGreedGated(_Const(1.0), fear, **kw).signal([_candle(1)]) == 0.0
