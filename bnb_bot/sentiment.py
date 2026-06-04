@@ -122,7 +122,7 @@ def parse_alternative(payload: dict) -> list[FearGreedReading]:
 # --- network fetch (kept out of unit tests) ----------------------------
 
 
-def _cmc_key() -> str:
+def cmc_api_key() -> str:
     """Read CMC_PRO_API_KEY from the environment or a local .env. Fail loud."""
     key = os.environ.get("CMC_PRO_API_KEY")
     if key:
@@ -151,7 +151,7 @@ def _http_get_json(url: str, headers: dict | None = None) -> dict:
 
 
 def _fetch_cmc() -> list[FearGreedReading]:
-    key = _cmc_key()
+    key = cmc_api_key()
     headers = {"X-CMC_PRO_API_KEY": key}
     readings: list[FearGreedReading] = []
     start, limit = 1, 500
