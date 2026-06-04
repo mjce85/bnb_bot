@@ -394,3 +394,103 @@ class FearGreedGated(Strategy):
         if self._fear_threshold is not None and value <= self._fear_threshold:
             return max(0.0, min(1.0, base_w * self._fear_weight))
         return base_w
+
+
+# --- Donchian breakout (challenger) ------------------------------------
+
+
+@dataclass(frozen=True)
+class DonchianParams:
+    entry_period: int = 20  # Turtle System-1 entry channel (~one month)
+    exit_period: int = 10  # Turtle System-1 exit channel
+
+    def __post_init__(self):
+        if self.entry_period < 2 or self.exit_period < 2:
+            raise ValueError("channel periods must be >= 2")
+
+
+class DonchianBreakout(Strategy):
+    """Turtle-style breakout: enter on a new high, exit on a trailing low.
+
+    Long when the latest close breaks **above the highest high of the prior
+    ``entry_period`` bars**; exit when it breaks **below the lowest low of the
+    prior ``exit_period`` bars**; hold the stance in between (hysteresis via a
+    tiny bit of causal state, like :class:`MeanReversion`). The point of the A/B:
+    unlike the entry's EMA-cross + SMA gate — which exits early and re-enters late
+    — a breakout channel *stays long for the whole duration a trend holds*, so it
+    captures the bull-market upside the entry leaves on the table.
+
+    Channels exclude the current bar (we compare today's close to the channel
+    formed by the bars *before* it), so the rule is causal. Parameters are the
+    classic Turtle System-1 values (20 / 10), frozen by convention not search.
+    """
+
+    def __init__(self, params: DonchianParams = DonchianParams()):
+        self._params = params
+        self._long = False  # stance; updated only from past bars
+
+    @property
+    def name(self) -> str:
+        return f"donchian_{self._params.entry_period}_{self._params.exit_period}"
+
+    @property
+    def params(self) -> dict:
+        return asdict(self._params)
+
+    def signal(self, history: list[Candle]) -> float:
+        need = max(self._params.entry_period, self._params.exit_period) + 1
+        if len(history) < need:
+            return 0.0  # warmup
+        last = history[-1].close
+        prior_high = max(c.high for c in history[-(self._params.entry_period + 1) : -1])
+        prior_low = min(c.low for c in history[-(self._params.exit_period + 1) : -1])
+        if not self._long and last > prior_high:
+            self._long = True
+        elif self._long and last < prior_low:
+            self._long = False
+        return 1.0 if self._long else 0.0
+
+
+# --- Time-series momentum (challenger) ---------------------------------
+
+
+@dataclass(frozen=True)
+class TimeSeriesMomentumParams:
+    lookback: int = 365  # ~12 months; the canonical trend-following horizon
+
+    def __post_init__(self):
+        if self.lookback < 2:
+            raise ValueError("lookback must be >= 2")
+
+
+class TimeSeriesMomentum(Strategy):
+    """Long while the asset's own trailing ``lookback``-day return is positive.
+
+    The Moskowitz/Ooi/Pedersen "time-series momentum" rule: an asset's own past
+    return predicts its near future. Long-only here (weight 1 if the trailing
+    12-month return is positive, else cash). The 12-month lookback is the single
+    least data-mined parameter in trend-following — validated across dozens of
+    instruments and decades — so it's the honest apples-to-apples test of "does
+    simply staying long through the whole trend win back return?" vs the entry's
+    faster, cash-prone signal. Pure function of past closes.
+    """
+
+    def __init__(self, params: TimeSeriesMomentumParams = TimeSeriesMomentumParams()):
+        self._params = params
+
+    @property
+    def name(self) -> str:
+        return f"tsmom_{self._params.lookback}"
+
+    @property
+    def params(self) -> dict:
+        return asdict(self._params)
+
+    def signal(self, history: list[Candle]) -> float:
+        lb = self._params.lookback
+        if len(history) < lb + 1:
+            return 0.0  # warmup
+        past = history[-(lb + 1)].close
+        if past <= 0:
+            return 0.0
+        return 1.0 if (history[-1].close / past - 1.0) > 0.0 else 0.0

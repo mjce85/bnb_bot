@@ -63,23 +63,30 @@ def _aligned_timeline(candles_by_symbol: dict) -> list:
     return sorted(common)
 
 
-def run_portfolio_backtest(
-    candles_by_symbol: dict,
-    make_strategy: Callable[[str], StrategyLike],
-    *,
-    starting_equity: float = config.STARTING_EQUITY_USD,
-    costs: config.CostModel = config.DEFAULT_COSTS,
-    risk: Optional[RiskManager] = None,
-    max_total_exposure: float = 1.0,
-    rebalance_band: float = 0.0,
-    min_trade_usd: float = 1.0,
-    params: Optional[dict] = None,
-) -> PortfolioResult:
-    """Run ``make_strategy(symbol)`` across all symbols on a shared book.
+# An allocator sees every symbol's causal history and returns a target-weight
+# vector. The per-symbol engine is the special case where each weight depends only
+# on its own history; a *rotation* allocator ranks symbols against each other.
+Allocator = Callable[[dict], dict]
 
-    ``make_strategy`` is a factory called once per symbol, so stateful strategies
-    stay isolated. ``max_total_exposure`` caps the summed target weight across all
-    symbols (the constraint a single-asset run can't express).
+
+def _portfolio_loop(
+    candles_by_symbol: dict,
+    allocator: Allocator,
+    *,
+    starting_equity: float,
+    costs: config.CostModel,
+    risk: Optional[RiskManager],
+    max_total_exposure: float,
+    rebalance_band: float,
+    min_trade_usd: float,
+    params: Optional[dict],
+) -> PortfolioResult:
+    """Shared shared-book rebalancing loop, driven by a portfolio ``allocator``.
+
+    ``allocator`` is called each bar with ``{symbol: candles[: t+1]}`` and returns
+    ``{symbol: target_weight}``. Everything downstream — next-bar fills, costs,
+    per-symbol risk, the total-exposure cap, sells-before-buys — is identical for
+    every allocation model, so economics can't drift between them.
     """
     symbols = list(candles_by_symbol)
     timeline = _aligned_timeline(candles_by_symbol)
@@ -93,7 +100,6 @@ def run_portfolio_backtest(
     }
     aligned = {sym: [by_ts[sym][t] for t in timeline] for sym in symbols}
 
-    signal_fns = {sym: _as_signal_fn(make_strategy(sym)) for sym in symbols}
     slip = costs.slippage_bps / 10_000.0
 
     cash = starting_equity
@@ -171,10 +177,11 @@ def run_portfolio_backtest(
                 if fill is not None:
                     fills.append(fill)
 
-        # 2. Decide for each symbol from its causal slice, to fill at i+1.
+        # 2. Decide the whole weight vector from causal slices, to fill at i+1.
         if i < n - 1:
-            for sym in symbols:
-                pending[sym] = _clamp_weight(signal_fns[sym](aligned[sym][: i + 1]))
+            histories = {sym: aligned[sym][: i + 1] for sym in symbols}
+            weights = allocator(histories)
+            pending = {sym: _clamp_weight(weights.get(sym, 0.0)) for sym in symbols}
         else:
             pending = {sym: None for sym in symbols}
 
@@ -193,6 +200,76 @@ def run_portfolio_backtest(
         equity_curve=equity_curve,
         fills=fills,
         params=dict(params or {}),
+    )
+
+
+def run_portfolio_backtest(
+    candles_by_symbol: dict,
+    make_strategy: Callable[[str], StrategyLike],
+    *,
+    starting_equity: float = config.STARTING_EQUITY_USD,
+    costs: config.CostModel = config.DEFAULT_COSTS,
+    risk: Optional[RiskManager] = None,
+    max_total_exposure: float = 1.0,
+    rebalance_band: float = 0.0,
+    min_trade_usd: float = 1.0,
+    params: Optional[dict] = None,
+) -> PortfolioResult:
+    """Run ``make_strategy(symbol)`` across all symbols on a shared book.
+
+    ``make_strategy`` is a factory called once per symbol, so stateful strategies
+    stay isolated. Each symbol's weight depends only on its own history — the
+    independent-sleeves model. ``max_total_exposure`` caps the summed target weight
+    across symbols (the constraint a single-asset run can't express).
+    """
+    symbols = list(candles_by_symbol)
+    signal_fns = {sym: _as_signal_fn(make_strategy(sym)) for sym in symbols}
+
+    def allocator(histories: dict) -> dict:
+        return {sym: signal_fns[sym](histories[sym]) for sym in histories}
+
+    return _portfolio_loop(
+        candles_by_symbol,
+        allocator,
+        starting_equity=starting_equity,
+        costs=costs,
+        risk=risk,
+        max_total_exposure=max_total_exposure,
+        rebalance_band=rebalance_band,
+        min_trade_usd=min_trade_usd,
+        params=params,
+    )
+
+
+def run_rotation_backtest(
+    candles_by_symbol: dict,
+    allocator: Allocator,
+    *,
+    starting_equity: float = config.STARTING_EQUITY_USD,
+    costs: config.CostModel = config.DEFAULT_COSTS,
+    risk: Optional[RiskManager] = None,
+    max_total_exposure: float = 1.0,
+    rebalance_band: float = 0.0,
+    min_trade_usd: float = 1.0,
+    params: Optional[dict] = None,
+) -> PortfolioResult:
+    """Run a cross-sectional ``allocator`` across all symbols on a shared book.
+
+    The allocator sees ``{symbol: candles[: t+1]}`` and returns
+    ``{symbol: target_weight}`` — letting a symbol's weight depend on *other*
+    symbols (rotation, ranking, relative momentum). Shares the exact fill / cost /
+    risk machinery of :func:`run_portfolio_backtest`.
+    """
+    return _portfolio_loop(
+        candles_by_symbol,
+        allocator,
+        starting_equity=starting_equity,
+        costs=costs,
+        risk=risk,
+        max_total_exposure=max_total_exposure,
+        rebalance_band=rebalance_band,
+        min_trade_usd=min_trade_usd,
+        params=params,
     )
 
 
