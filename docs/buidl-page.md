@@ -1,4 +1,4 @@
-# DoraHacks BUIDL page copy — bnb_bot
+# DoraHacks BUIDL page copy — Cadence (repo: bnb_bot)
 
 Paste-ready copy for the BNB HACK Track 2 submission. Fields below map to the
 DoraHacks BUIDL form. Numbers match `README.md` / `SUBMISSION.md` and the demo
@@ -8,9 +8,9 @@ video.
 
 ## Project name
 
-**bnb_bot — a backtest you can actually trust**
+**Cadence — discipline over hype**
 
-(If a short standalone name is needed: `bnb_bot`. The subtitle is the hook.)
+(Logo wordmark: `cdnc`. Repo slug stays `bnb_bot`.)
 
 ## Tagline / one-liner
 
@@ -38,7 +38,7 @@ fees, or get tuned until they look good on the one slice of history the author
 happened to test. In a bull market it's easy to show a big number and impossible
 to know if it means anything.
 
-`bnb_bot` is the opposite: a strategy whose backtest you can **trust**, that wins
+**Cadence** is the opposite: a strategy whose backtest you can **trust**, that wins
 on **risk**, and that holds up out of sample.
 
 ## What it is
