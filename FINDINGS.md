@@ -131,7 +131,7 @@ is the one thread I'd pull; everything else is rearranging deck chairs.
 
 🛑 **Stopping at the gate (T9).** Per PLAN.md I am not sharpening alpha,
 sweeping parameters, or adding strategies. The direction call — pull the
-lower-frequency thread, change arenas, or shelve it — is yours, Markus.
+lower-frequency thread, change arenas, or shelve it — is yours.
 
 ---
 ---
@@ -262,7 +262,7 @@ Three decisions before I do more:
 
 🛑 **Stopping for review (R4).** Stage 2 is complete. I'm not fixing the breaker,
 tuning the risk-adjusted thread, or starting the search engine until you weigh in
-on the three decisions above — those are yours, Markus.
+on the three decisions above — those are yours.
 
 ---
 ---
@@ -384,7 +384,7 @@ which is the one thing our whole pitch is built against.
 🛑 **Stopping for review (S4).** Stage 3 is complete — the risk-adjusted entry is
 built and validated. I'm holding on the strategy-search engine (token-expensive,
 needs your explicit go-ahead) and on packaging until you pick the path in
-section 4. Your call, Markus.
+section 4. Your call.
 
 ---
 ---
@@ -467,7 +467,7 @@ upside, not necessity.
 ---
 
 🛑 **Stopping for review (P4).** Stage 4 complete — searched, locked, packaged,
-all green. Nothing further runs without your go-ahead. Over to you, Markus.
+all green. Nothing further runs without your go-ahead. Over to you.
 
 ---
 ---
@@ -533,7 +533,7 @@ tuning, so no new overfitting risk was introduced.
 🛑 **Stopping for review (Stage 5).** The portfolio improvement is done and
 reported honestly, including where my hypothesis was wrong. Still held for your
 explicit go-ahead: the multi-agent search engine, the live execution layer, and
-any demo polish. Over to you, Markus.
+any demo polish. Over to you.
 
 ---
 ---
@@ -652,7 +652,7 @@ and the README/SUBMISSION numbers reflect the re-locked entry. 89 tests green.
 
 🛑 **Pausing (Stage 7).** The entry is re-locked, cost-hardened, and all docs/
 artifacts are consistent. Open operator-gated calls unchanged: multi-agent search
-engine, live execution layer, GitHub + CI. Your move, Markus.
+engine, live execution layer, GitHub + CI. Your move.
 
 ---
 ---
@@ -726,8 +726,7 @@ claimed otherwise, and now we have the error bars to prove the distinction.
 ---
 
 🛑 **Pausing (Stage 8).** Both pressure tests done; figures `docs/bootstrap.png`
-and `docs/regime_slices.png`. Open operator-gated calls unchanged. Your move,
-Markus.
+and `docs/regime_slices.png`. Open operator-gated calls unchanged. Your move.
 
 ---
 ---
@@ -771,7 +770,7 @@ little more drawdown for enough return to come out ahead.
 
 🛑 **Pausing (Stage 9).** Sensitivity mapped; locked config confirmed to sit on a
 stable plateau (held the discipline — no holdout re-fit). Open operator-gated
-calls unchanged. Your move, Markus.
+calls unchanged. Your move.
 
 ---
 ---
@@ -863,7 +862,7 @@ committed locally in atomic commits on `master`.
 
 🛑 **Pausing (Stage 10).** Packaging done, spec written, mechanics confirmed, all
 green. The Agent Hub decision (now sharpened to "likely worth doing") and the
-DoraHacks submission are yours. Over to you, Markus.
+DoraHacks submission are yours. Over to you.
 
 ---
 ---
@@ -956,7 +955,7 @@ pitch rejects, and it probably overlaps machinery we already have. So:
 
 🛑 **Pausing (Stage 11).** CMC sentiment tested honestly, parked with reasons,
 and shipped as live context. Locked entry untouched. Open operator-gated calls
-unchanged (live execution layer; GitHub remote). Your move, Markus.
+unchanged (live execution layer; GitHub remote). Your move.
 
 ---
 ---
@@ -1068,7 +1067,7 @@ per-asset risk control and vol-targeting smooth the whole book.
 
 🛑 **Pausing (Stage 12).** A/B done; entry validated against real competition, and
 the one honest improvement lead (slower trend-following exit) is logged for
-deliberate validation, not curve-fit now. Locked entry unchanged. Your move, Markus.
+deliberate validation, not curve-fit now. Locked entry unchanged. Your move.
 
 ---
 ---
@@ -1122,4 +1121,4 @@ as a tested, documented building block; it is not part of the shipped entry.
 
 🛑 **Pausing (Stage 13).** The one real lead from the A/B was validated and closed
 as a wash; entry frozen, no overfitting. Strategy exploration is now genuinely
-done — next is submission polish, not more backtests. Your move, Markus.
+done — next is submission polish, not more backtests. Your move.

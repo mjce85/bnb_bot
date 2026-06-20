@@ -29,8 +29,9 @@ tests/             # correctness tests (the backtest's credibility lives here)
 ```
 
 **Engine model:** genuine *counterfactual* historical simulation (walk candles,
-apply strategy, simulate fills). This is the OPPOSITE of imx_bot's recorder —
-do not port recorder semantics, only the venue-adapter / typed-dataclass shape.
+apply strategy, simulate fills). This is the OPPOSITE of a passive market
+recorder — do not port recorder semantics, only the venue-adapter /
+typed-dataclass shape.
 
 ---
 
@@ -82,7 +83,7 @@ this sandbox repo — nothing irreversible, no money, safe to run unattended.
 
 ## 🛑 STOP-AND-WAIT GATE (do not cross autonomously)
 
-After T9, **stop and wait for Markus.** Do NOT begin sharpening alpha,
+After T9, **stop and wait for the operator.** Do NOT begin sharpening alpha,
 sweeping parameters, or adding strategies beyond the two baselines. That is
 where overfitting risk and "build something that runs but means nothing"
 creep in — and it needs the operator's judgment on *direction*.
@@ -96,9 +97,9 @@ creep in — and it needs the operator's judgment on *direction*.
 5. Any data/cost-model caveats that make the numbers softer than they look.
 
 Keep it blunt. A clear "the baselines don't beat fees, here's why" is a
-*successful* overnight outcome — it saves Markus a week.
+*successful* overnight outcome — it saves the operator a week.
 
-**Gate outcome (operator decision):** baselines confirmed no edge. Markus chose
+**Gate outcome (operator decision):** baselines confirmed no edge. The operator chose
 the **robust redesign** thread (Stage 2 below) over a parameter search or an
 arena change.
 
@@ -332,4 +333,4 @@ three (research-guided), same honest rig, conventional params, no overfitting.
 - Live trading / Trust Wallet execution layer (later, gated on review).
 - CMC paid tier (free tier covers live quotes; ccxt covers history).
 - Perps / leverage (TWAK is spot-only; live perps play to our slowness).
-- GitHub remote (local-only until Markus reviews the morning output).
+- GitHub remote (local-only until the operator reviews the morning output).

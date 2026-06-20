@@ -23,7 +23,7 @@ Four rules, applied in this precedence (each can only make the book *safer*):
    weight already held, so the strategy can still trim or exit but cannot add.
    Because the peak resets when flat, a strategy that goes to cash is never
    locked out — it can re-enter once a fresh signal appears. Ported concept (not
-   code) from imx_bot's breaker.
+   code) from a prior project's drawdown breaker.
 
 Every rule only ever lowers risk, so order matters only for clarity: a stop
 exits even mid-breaker, and the breaker never forces buying.

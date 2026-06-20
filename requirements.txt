@@ -1,4 +1,4 @@
-# Core data + math (mirrors imx_bot stack — no new heavy deps)
+# Core data + math — no new heavy deps
 ccxt>=4.5            # historical OHLCV across exchanges (Binance for BSC-listed tokens)
 polars>=1.40         # lazy DataFrames + parquet
 pyarrow>=15          # parquet engine

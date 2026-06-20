@@ -1,4 +1,4 @@
-# CLAUDE.md — bnb_bot
+# bnb_bot
 
 Guidance for Claude Code when working in this repository.
 
@@ -10,13 +10,13 @@ We are building **Track 2**: a strategy engine that generates
 **backtestable trading strategies** from market data, judged on
 **returns, drawdown, risk-adjusted performance, and rule adherence**.
 
-This is a sibling project to `imx_bot` (NFT trading) and `sol_bot`. It
-reuses *patterns and discipline* from `imx_bot` — NOT its code.
+It reuses *patterns and discipline* from prior trading-bot projects — NOT
+their code; this repo stands alone.
 
 ## Hard rules
 
-- **No imports from `imx_bot` or `sol_bot`.** Port patterns by hand; this
-  repo stands alone. (Same folder-boundary discipline `imx_bot` enforces.)
+- **No imports from sibling projects.** Port patterns by hand; this
+  repo stands alone.
 - **No live trading in this milestone.** Backtest + report only. No real
   capital, no orders, no private keys. The Trust Wallet execution layer is
   a *later* concern, gated behind operator review. Until then this repo
@@ -55,6 +55,6 @@ No GSD machinery in this repo.
 
 ## Operator
 
-Single developer (`mjce85` / markus.jce@gmail.com). Business-minded, the
+Single developer (`mjce85`). Business-minded, the
 visionary — explain in plain language, lead with what something *does*.
 The strategy *direction* is the operator's call; the engineering is ours.

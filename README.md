@@ -2,13 +2,11 @@
 
 **BNB HACK — AI Trading Agent · Track 2 (backtestable strategy engine)**
 
-*Repository and Python package: `bnb_bot`.*
-
 > Our edge is not the biggest number. It's a strategy whose backtest you can
 > *trust*, that controls drawdown by design, and that proves itself on data it
 > was never tuned on.
 
-`bnb_bot` is a strategy engine that generates and backtests trading strategies
+This engine generates and backtests trading strategies
 on liquid BNB-ecosystem tokens. The shippable entry is **volatility-targeted,
 regime-gated momentum**: it rides uptrends, sits in cash during downtrends, and
 scales its exposure down when markets get turbulent — cutting drawdown to a
