@@ -1,4 +1,4 @@
-# PLAN.md — bnb_bot Track 2 sprint
+# Track 2 sprint
 
 **Target:** A trustworthy backtest engine + at least two baseline strategies
 + an honest backtest report, for the BNB HACK Track 2 ("strategy skills that

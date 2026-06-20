@@ -1,4 +1,4 @@
-# STRATEGY-SPEC.md — Risk-Controlled Regime Momentum
+# Risk-Controlled Regime Momentum
 
 **A self-contained, backtestable specification.** This document defines the
 strategy precisely enough that an independent party can re-implement it from

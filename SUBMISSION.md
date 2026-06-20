@@ -18,7 +18,7 @@ control — **risk** — and that proves itself on data it was never tuned on.
 
 ## What it does
 
-`bnb_bot` generates and backtests trading strategies for liquid BNB-ecosystem
+The engine generates and backtests trading strategies for liquid BNB-ecosystem
 tokens. Our entry is **volatility-targeted, regime-gated momentum**:
 
 - **Momentum** rides uptrends.
@@ -30,7 +30,7 @@ tokens. Our entry is **volatility-targeted, regime-gated momentum**:
 
 The result, over 2021–2026 daily across BNB/CAKE/ETH/BTC: **max drawdown of
 23–37% versus buy-and-hold's 71–98%** — roughly a third to a half — while staying
-profitable on every token, including CAKE, which lost 92% buy-and-hold.
+profitable on every token, including CAKE, which buy-and-hold rode down −92%.
 
 ## How we built it
 
@@ -111,4 +111,4 @@ python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 
 See [`README.md`](README.md) for detail, [`FINDINGS.md`](FINDINGS.md) for the
 full research narrative (including the dead-ends), and
-[`reports/search_summary.md`](reports/search_summary.md) for the holdout numbers.
+[`reports/search_cost_robust_summary.md`](reports/search_cost_robust_summary.md) for the holdout numbers.
