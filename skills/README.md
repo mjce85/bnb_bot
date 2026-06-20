@@ -1,4 +1,4 @@
-# CMC Skills — Cadence
+# CMC Skills
 
 This folder packages the bnb_bot strategy as a **CMC Skill** (the lightweight,
 folder-based format from
