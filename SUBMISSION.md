@@ -1,4 +1,4 @@
-# bnb_bot — submission pitch
+# Cadence — discipline over hype
 
 **BNB HACK — AI Trading Agent · Track 2 (backtestable strategy engine)**
 

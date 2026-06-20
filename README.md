@@ -1,6 +1,8 @@
-# bnb_bot — a disciplined, honestly-backtested trading strategy
+# Cadence — discipline over hype
 
 **BNB HACK — AI Trading Agent · Track 2 (backtestable strategy engine)**
+
+*Repository and Python package: `bnb_bot`.*
 
 > Our edge is not the biggest number. It's a strategy whose backtest you can
 > *trust*, that controls drawdown by design, and that proves itself on data it
